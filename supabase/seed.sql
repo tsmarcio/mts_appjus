@@ -1,0 +1,2 @@
+-- Base inicial zerada.
+-- Cadastros devem ser feitos pelo sistema.

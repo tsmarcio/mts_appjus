@@ -1,0 +1,34 @@
+JUREX — FIGMA STARTER KIT
+
+COMO IMPORTAR
+1. Baixe e extraia o arquivo ZIP.
+2. Abra o Figma.
+3. Crie um novo arquivo.
+4. Arraste cada arquivo .SVG para uma página separada do Figma.
+5. Clique duas vezes nos grupos para editar textos, formas, cores e organização.
+6. Converta os blocos reutilizáveis em Components.
+7. Crie Variables para cores, espaçamentos, radius e modos Light/Dark.
+
+ORDEM RECOMENDADA
+01_Arquitetura_Informacao.svg
+02_Fluxos_Principais.svg
+03_Design_System.svg
+04_Inventario_Telas.svg
+05_Wireframes_Iniciais.svg
+
+PÁGINAS SUGERIDAS NO FIGMA
+00 — Capa
+01 — Arquitetura da informação
+02 — Fluxos
+03 — Wireframes mobile
+04 — Wireframes web
+05 — Design System
+06 — Componentes
+07 — Telas mobile
+08 — Telas web
+09 — Admin
+10 — Protótipos
+11 — Handoff
+
+IMPORTANTE
+O Figma não permite gerar um arquivo .fig externo de forma confiável. SVG é a melhor forma para levar toda a estrutura já montada e ainda manter os elementos editáveis.

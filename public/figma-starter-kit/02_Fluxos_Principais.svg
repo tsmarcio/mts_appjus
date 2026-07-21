@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="3000" viewBox="0 0 1800 3000">
+    <title>Jurex — Fluxos principais</title>
+    <defs>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="6" stdDeviation="10" flood-opacity="0.12"/>
+      </filter>
+      <style>
+        .title { font: 700 44px Inter, Arial, sans-serif; fill:#111827; }
+        .subtitle { font: 500 22px Inter, Arial, sans-serif; fill:#4B5563; }
+        .h1 { font: 700 30px Inter, Arial, sans-serif; fill:#111827; }
+        .h2 { font: 700 22px Inter, Arial, sans-serif; fill:#111827; }
+        .body { font: 400 17px Inter, Arial, sans-serif; fill:#374151; }
+        .small { font: 400 14px Inter, Arial, sans-serif; fill:#6B7280; }
+        .label { font: 600 14px Inter, Arial, sans-serif; fill:#065F46; }
+      </style>
+    </defs>
+    <rect width="100%" height="100%" fill="#F8FAFC"/>
+    
+<text x="80" y="95" class="title">JUREX — Fluxos principais</text>
+<text x="80" y="135" class="subtitle">Use cada bloco como uma seção de FigJam ou como frames de protótipo</text>
+<g filter="url(#shadow)">
+<rect x="80" y="210" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="210" width="8" height="270" rx="4" fill="#10B981"/>
+<text x="108" y="252" class="h2">Fluxo 1 — Cadastro</text>
+<circle cx="114" cy="280" r="4" fill="#10B981"/>
+<text x="128" y="286" class="body">
+<tspan x="128" dy="0">Landing → Criar conta → Dados pessoais → E-mail e senha → Aceite dos termos → Confirmar e-mail → Cadastrar empresa → Escolher</tspan>
+<tspan x="128" dy="23">plano → Configuração inicial → Dashboard</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="540" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="540" width="8" height="270" rx="4" fill="#2563EB"/>
+<text x="108" y="582" class="h2">Fluxo 2 — Login</text>
+<circle cx="114" cy="610" r="4" fill="#2563EB"/>
+<text x="128" y="616" class="body">
+<tspan x="128" dy="0">Login → Validar credenciais → 2FA, quando habilitado → Dashboard</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="870" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="870" width="8" height="270" rx="4" fill="#7C3AED"/>
+<text x="108" y="912" class="h2">Fluxo 3 — Novo cliente</text>
+<circle cx="114" cy="940" r="4" fill="#7C3AED"/>
+<text x="128" y="946" class="body">
+<tspan x="128" dy="0">Clientes → Novo cliente → Identificação → Contato → Endereço → Dados financeiros → Documentos → Referências → Revisão → Salvar</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="1200" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="1200" width="8" height="270" rx="4" fill="#F59E0B"/>
+<text x="108" y="1242" class="h2">Fluxo 4 — Novo contrato</text>
+<circle cx="114" cy="1270" r="4" fill="#F59E0B"/>
+<text x="128" y="1276" class="body">
+<tspan x="128" dy="0">Novo contrato → Selecionar cliente → Valor → Tipo de juros → Atraso → Parcelas → Frequência → Primeiro vencimento → Garantias</tspan>
+<tspan x="128" dy="23">→ Simulação → Revisão → Confirmar → Gerar PDF</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="1530" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="1530" width="8" height="270" rx="4" fill="#10B981"/>
+<text x="108" y="1572" class="h2">Fluxo 5 — Pagamento</text>
+<circle cx="114" cy="1600" r="4" fill="#10B981"/>
+<text x="128" y="1606" class="body">
+<tspan x="128" dy="0">Contrato → Selecionar parcela → Registrar pagamento → Valor recebido → Forma de pagamento → Data → Desconto/acréscimo →</tspan>
+<tspan x="128" dy="23">Confirmar → Gerar comprovante → Compartilhar</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="1860" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="1860" width="8" height="270" rx="4" fill="#2563EB"/>
+<text x="108" y="1902" class="h2">Fluxo 6 — Cobrança</text>
+<circle cx="114" cy="1930" r="4" fill="#2563EB"/>
+<text x="128" y="1936" class="body">
+<tspan x="128" dy="0">Parcelas vencidas → Cliente → Débito → Modelo de mensagem → Editar → Enviar → Registrar tentativa → Programar retorno</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="2190" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="2190" width="8" height="270" rx="4" fill="#7C3AED"/>
+<text x="108" y="2232" class="h2">Fluxo 7 — Renegociação</text>
+<circle cx="114" cy="2260" r="4" fill="#7C3AED"/>
+<text x="128" y="2266" class="body">
+<tspan x="128" dy="0">Contrato em atraso → Selecionar parcelas → Calcular saldo → Desconto/entrada → Novo parcelamento → Revisão → Confirmar → Gerar</tspan>
+<tspan x="128" dy="23">termo</tspan>
+</text>
+</g>
+<g filter="url(#shadow)">
+<rect x="80" y="2520" width="1520" height="270" rx="20" fill="#FFFFFF" stroke="#E5E7EB"/>
+<rect x="80" y="2520" width="8" height="270" rx="4" fill="#F59E0B"/>
+<text x="108" y="2562" class="h2">Fluxo 8 — Relatório</text>
+<circle cx="114" cy="2590" r="4" fill="#F59E0B"/>
+<text x="128" y="2596" class="body">
+<tspan x="128" dy="0">Relatórios → Selecionar tipo → Período → Filtros → Visualizar → Exportar PDF/CSV</tspan>
+</text>
+</g>
+</svg>
