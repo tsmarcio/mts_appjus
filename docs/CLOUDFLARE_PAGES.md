@@ -34,3 +34,43 @@ https://mts-appjus.pages.dev
 ```
 
 Tambem sera publicado automaticamente a cada push na branch `main`.
+
+## Correcao do painel Cloudflare
+
+Se o log mostrar:
+
+```text
+Executing user deploy command: npx wrangler deploy
+Uploaded appjus
+https://appjus.tsmarcio.workers.dev
+```
+
+voce criou/publicou como Workers, nao como Pages.
+
+Para gerar exatamente:
+
+```text
+https://mts-appjus.pages.dev
+```
+
+use estas configuracoes no Cloudflare Pages:
+
+```text
+Project name: mts-appjus
+Framework preset: Vite
+Build command: npm run build
+Build output directory: dist
+Deploy command: deixe vazio
+```
+
+Nao use:
+
+```text
+npx wrangler deploy
+```
+
+Se quiser deploy manual pelo terminal, use:
+
+```bash
+npm run deploy:cloudflare
+```
