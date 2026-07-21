@@ -268,6 +268,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1)
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
   const todayIso = useMemo(getTodayIso, [])
+  const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
 
   useEffect(() => {
     async function loadSupabaseContracts() {
@@ -688,7 +689,7 @@ function App() {
       <aside className="sidebar" aria-label="Navegacao principal">
         <div className="brand">
           <span className="brand-logo-frame">
-            <img className="brand-logo" src="/brand/mts-appjus-logo.png" alt="MTS AppJus" />
+            <img className="brand-logo" src={brandLogoPath} alt="MTS AppJus" />
           </span>
           <div>
             <strong>MTS AppJus</strong>
@@ -722,7 +723,7 @@ function App() {
 
       <section className="workspace">
         <section className="brand-hero" aria-label="Identidade MTS AppJus">
-          <img src="/brand/mts-appjus-logo.png" alt="MTS AppJus - Gestao Discreta e Segura de Acordos Privados" />
+          <img src={brandLogoPath} alt="MTS AppJus - Gestao Discreta e Segura de Acordos Privados" />
         </section>
 
         <header className="topbar" id="dashboard">
