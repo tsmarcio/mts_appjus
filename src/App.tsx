@@ -8,15 +8,19 @@ import {
   FileText,
   LayoutDashboard,
   LockKeyhole,
+  Mail,
   Plus,
   Search,
+  ShieldCheck,
   Trash2,
   UserRoundCheck,
 } from 'lucide-react'
 import './App.css'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 
-type ContractStatus = 'active' | 'overdue'
+type ContractStatus = 'active' | 'paused' | 'overdue'
+type ContractDuration = 'indefinite' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12'
+type ContractTab = 'all' | ContractStatus
 
 type Contract = {
   id: string
@@ -30,15 +34,20 @@ type Contract = {
   value: string
   date: string
   status: ContractStatus
+  duration: ContractDuration
 }
 
 type ContractForm = Omit<Contract, 'id'>
+
+type FormErrors = Partial<Record<keyof ContractForm, string>>
 
 type OperationRow = {
   id: string
   code: string
   principal_amount: number
   status: ContractStatus
+  duration_months: number | null
+  duration_indefinite: boolean | null
   due_date: string
   requested_by: string | null
   client_id: string
@@ -67,9 +76,34 @@ const emptyForm: ContractForm = {
   value: '',
   date: '',
   status: 'active',
+  duration: 'indefinite',
 }
 
 const storageKey = 'mts-appjus-contracts-v2'
+const contractsPerPage = 5
+const contractStatusLabels: Record<ContractStatus, string> = {
+  active: 'Ativo',
+  paused: 'Pausado',
+  overdue: 'Inadimplente',
+}
+
+const contractDurationOptions: { label: string; value: ContractDuration }[] = [
+  { label: 'Tempo indeterminado', value: 'indefinite' },
+  ...Array.from({ length: 12 }, (_, index) => {
+    const value = String(index + 1) as ContractDuration
+    return { label: `${value}x`, value }
+  }),
+]
+
+function formatDuration(value: ContractDuration) {
+  return value === 'indefinite' ? 'Tempo indeterminado' : `${value}x`
+}
+
+function getTodayIso() {
+  const today = new Date()
+  today.setMinutes(today.getMinutes() - today.getTimezoneOffset())
+  return today.toISOString().slice(0, 10)
+}
 
 function loadContracts() {
   const stored = window.localStorage.getItem(storageKey)
@@ -78,7 +112,21 @@ function loadContracts() {
   }
 
   try {
-    return JSON.parse(stored) as Contract[]
+    const parsedContracts = JSON.parse(stored) as Partial<Contract>[]
+    return parsedContracts.map((contract, index) => ({
+      id: contract.id ?? `MTS-${String(index + 1).padStart(4, '0')}`,
+      operationId: contract.operationId,
+      clientId: contract.clientId,
+      clientName: contract.clientName ?? '',
+      documentNumber: contract.documentNumber ?? '',
+      email: contract.email ?? '',
+      phone: contract.phone ?? '',
+      requestedBy: contract.requestedBy ?? '',
+      value: contract.value ?? '',
+      date: contract.date ?? '',
+      status: contract.status ?? 'active',
+      duration: contract.duration ?? 'indefinite',
+    }))
   } catch {
     return []
   }
@@ -97,6 +145,112 @@ function formatCurrency(value: string) {
   })
 }
 
+function onlyDigits(value: string) {
+  return value.replace(/\D/g, '')
+}
+
+function isValidCpf(documentNumber: string) {
+  const digits = onlyDigits(documentNumber)
+  if (digits.length !== 11 || /^(\d)\1+$/.test(digits)) {
+    return false
+  }
+
+  const validateDigit = (size: number) => {
+    const numbers = digits.slice(0, size).split('').map(Number)
+    const sum = numbers.reduce((total, number, index) => total + number * (size + 1 - index), 0)
+    const result = (sum * 10) % 11
+    return (result === 10 ? 0 : result) === Number(digits[size])
+  }
+
+  return validateDigit(9) && validateDigit(10)
+}
+
+function isValidCnpj(documentNumber: string) {
+  const digits = onlyDigits(documentNumber)
+  if (digits.length !== 14 || /^(\d)\1+$/.test(digits)) {
+    return false
+  }
+
+  const calculate = (base: string, weights: number[]) => {
+    const sum = base.split('').reduce((total, number, index) => total + Number(number) * weights[index], 0)
+    const rest = sum % 11
+    return rest < 2 ? 0 : 11 - rest
+  }
+
+  const firstDigit = calculate(digits.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+  const secondDigit = calculate(digits.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+
+  return firstDigit === Number(digits[12]) && secondDigit === Number(digits[13])
+}
+
+function formatDocument(value: string) {
+  const digits = onlyDigits(value).slice(0, 14)
+  if (digits.length <= 11) {
+    return digits
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d)/, '$1.$2')
+      .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+  }
+
+  return digits
+    .replace(/^(\d{2})(\d)/, '$1.$2')
+    .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d)/, '.$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+function formatPhone(value: string) {
+  const digits = onlyDigits(value).slice(0, 11)
+  if (digits.length <= 10) {
+    return digits
+      .replace(/^(\d{2})(\d)/, '($1) $2')
+      .replace(/(\d{4})(\d{1,4})$/, '$1-$2')
+  }
+
+  return digits
+    .replace(/^(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d{1,4})$/, '$1-$2')
+}
+
+function isValidDocument(documentNumber: string) {
+  const digits = onlyDigits(documentNumber)
+  return digits.length === 11 ? isValidCpf(digits) : digits.length === 14 ? isValidCnpj(digits) : false
+}
+
+function getEmailDomain(email: string) {
+  const parts = email.trim().toLowerCase().split('@')
+  return parts.length === 2 ? parts[1] : ''
+}
+
+function isValidEmailDomain(email: string) {
+  const domain = getEmailDomain(email)
+  return /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z]{2,})+$/i.test(domain)
+}
+
+function isValidPersonName(value: string) {
+  const normalized = value.trim().replace(/\s+/g, ' ')
+  const words = normalized.split(' ').filter(Boolean)
+  if (words.length < 2) {
+    return false
+  }
+
+  return words.every((word) => /^[\p{L}'-]{2,}$/u.test(word)) && !/(.)\1{3,}/i.test(normalized)
+}
+
+function isValidBrazilPhone(value: string) {
+  const digits = onlyDigits(value)
+  if ((digits.length !== 10 && digits.length !== 11) || /^(\d)\1+$/.test(digits)) {
+    return false
+  }
+
+  const ddd = Number(digits.slice(0, 2))
+  if (ddd < 11 || ddd > 99) {
+    return false
+  }
+
+  return digits.length === 10 || digits[2] === '9'
+}
+
 function formatDate(value: string) {
   if (!value) {
     return '-'
@@ -108,8 +262,12 @@ function formatDate(value: string) {
 function App() {
   const [contracts, setContracts] = useState<Contract[]>(loadContracts)
   const [form, setForm] = useState<ContractForm>(emptyForm)
+  const [formErrors, setFormErrors] = useState<FormErrors>({})
   const [query, setQuery] = useState('')
+  const [contractTab, setContractTab] = useState<ContractTab>('all')
+  const [currentPage, setCurrentPage] = useState(1)
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
+  const todayIso = useMemo(getTodayIso, [])
 
   useEffect(() => {
     async function loadSupabaseContracts() {
@@ -119,7 +277,7 @@ function App() {
 
       const { data, error } = await supabase
         .from('operations')
-        .select('id, code, principal_amount, status, due_date, requested_by, client_id, clients(full_name, document_number, email, phone)')
+        .select('id, code, principal_amount, status, duration_months, duration_indefinite, due_date, requested_by, client_id, clients(full_name, document_number, email, phone)')
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -144,6 +302,9 @@ function App() {
           }),
           date: operation.due_date,
           status: operation.status,
+          duration: operation.duration_indefinite
+            ? 'indefinite'
+            : String(operation.duration_months ?? 1) as ContractDuration,
         }
       })
 
@@ -157,11 +318,14 @@ function App() {
 
   const filteredContracts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
+    const contractsByTab =
+      contractTab === 'all' ? contracts : contracts.filter((contract) => contract.status === contractTab)
+
     if (!normalizedQuery) {
-      return contracts
+      return contractsByTab
     }
 
-    return contracts.filter((contract) =>
+    return contractsByTab.filter((contract) =>
       [
         contract.clientName,
         contract.documentNumber,
@@ -170,25 +334,34 @@ function App() {
         contract.requestedBy,
         contract.value,
         contract.date,
+        contractStatusLabels[contract.status],
+        formatDuration(contract.duration),
       ]
         .join(' ')
         .toLowerCase()
         .includes(normalizedQuery),
     )
-  }, [contracts, query])
+  }, [contractTab, contracts, query])
+
+  const totalPages = Math.max(1, Math.ceil(filteredContracts.length / contractsPerPage))
+  const pagedContracts = filteredContracts.slice((currentPage - 1) * contractsPerPage, currentPage * contractsPerPage)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [contractTab, query])
 
   const metrics = useMemo(
     () => [
       {
-        label: 'Quantidade de contratos',
-        value: String(contracts.length),
-        detail: 'Cadastrados na base',
-        icon: FileText,
-      },
-      {
         label: 'Contratos ativos',
         value: String(contracts.filter((contract) => contract.status === 'active').length),
         detail: 'Em acompanhamento',
+        icon: FileText,
+      },
+      {
+        label: 'Contratos pausados',
+        value: String(contracts.filter((contract) => contract.status === 'paused').length),
+        detail: 'Aguardando alteracao',
         icon: Banknote,
       },
       {
@@ -210,8 +383,208 @@ function App() {
   function updateForm(field: keyof ContractForm, value: string) {
     setForm((current) => ({
       ...current,
-      [field]: field === 'value' ? formatCurrency(value) : value,
+      [field]:
+        field === 'value'
+          ? formatCurrency(value)
+          : field === 'documentNumber'
+            ? formatDocument(value)
+            : field === 'phone'
+              ? formatPhone(value)
+              : value,
     }))
+    setFormErrors((current) => ({ ...current, [field]: undefined }))
+  }
+
+  function validateField(field: keyof ContractForm, value: string) {
+    const trimmed = value.trim()
+
+    if (field === 'requestedBy' && !isValidPersonName(trimmed)) {
+      return 'Nao validado: informe nome e sobrenome reais da referencia.'
+    }
+
+    if (field === 'clientName' && !isValidPersonName(trimmed)) {
+      return 'Nao validado: informe nome completo ou razao social valida.'
+    }
+
+    if (field === 'documentNumber' && !isValidDocument(trimmed)) {
+      return 'Nao validado: CPF/CNPJ com digito verificador invalido.'
+    }
+
+    if (field === 'phone' && !isValidBrazilPhone(trimmed)) {
+      return 'Nao validado: telefone brasileiro com DDD e numero real.'
+    }
+
+    if (field === 'email' && trimmed && !isValidEmailDomain(trimmed)) {
+      return 'Nao validado: dominio de e-mail invalido.'
+    }
+
+    if (field === 'value' && Number(trimmed.replace(/\D/g, '')) <= 0) {
+      return 'Nao validado: informe valor maior que zero.'
+    }
+
+    if (field === 'date' && (Number.isNaN(new Date(`${trimmed}T00:00:00`).getTime()) || trimmed < todayIso)) {
+      return 'Nao validado: informe uma data real a partir de hoje.'
+    }
+
+    return ''
+  }
+
+  function validateAndMarkField(field: keyof ContractForm) {
+    const error = validateField(field, form[field] ?? '')
+    setFormErrors((current) => ({ ...current, [field]: error || undefined }))
+    return !error
+  }
+
+  function validateForm(nextContract: Contract) {
+    const requiredFields: (keyof ContractForm)[] = [
+      'requestedBy',
+      'clientName',
+      'documentNumber',
+      'phone',
+      'value',
+      'date',
+    ]
+    const nextErrors: FormErrors = {}
+
+    for (const field of requiredFields) {
+      const error = validateField(field, nextContract[field] ?? '')
+      if (error) {
+        nextErrors[field] = error
+      }
+    }
+
+    if (nextContract.email) {
+      const emailError = validateField('email', nextContract.email)
+      if (emailError) {
+        nextErrors.email = emailError
+      }
+    }
+
+    setFormErrors(nextErrors)
+    return nextErrors
+  }
+
+  async function lookupDocument(documentNumber: string) {
+    const documentDigits = onlyDigits(documentNumber)
+    if (documentDigits.length !== 11 && documentDigits.length !== 14) {
+      return
+    }
+
+    if (!isValidDocument(documentDigits)) {
+      setFormErrors((current) => ({
+        ...current,
+        documentNumber: 'Nao validado: CPF/CNPJ com digito verificador invalido.',
+      }))
+      setSystemMessage('CPF/CNPJ com digito verificador invalido.')
+      return
+    }
+
+    const localMatch = contracts.find((contract) => onlyDigits(contract.documentNumber) === documentDigits)
+    if (localMatch) {
+      setForm((current) => ({
+        ...current,
+        clientName: localMatch.clientName,
+        email: localMatch.email,
+        phone: localMatch.phone,
+      }))
+      setFormErrors((current) => ({ ...current, documentNumber: undefined }))
+      setSystemMessage('CPF/CNPJ encontrado na base local. Dados do cliente preenchidos.')
+      return
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      setFormErrors((current) => ({ ...current, documentNumber: undefined }))
+      setSystemMessage('CPF/CNPJ validado. Supabase nao configurado para consulta em rede.')
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('clients')
+      .select('full_name, document_number, email, phone')
+      .eq('document_digits', documentDigits)
+      .maybeSingle()
+
+    if (error) {
+      setSystemMessage('CPF/CNPJ validado, mas a consulta no Supabase nao respondeu.')
+      return
+    }
+
+    if (!data) {
+      setFormErrors((current) => ({ ...current, documentNumber: undefined }))
+      setSystemMessage('CPF/CNPJ valido e livre para novo cadastro.')
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      clientName: data.full_name ?? current.clientName,
+      documentNumber: formatDocument(data.document_number ?? current.documentNumber),
+      email: data.email ?? current.email,
+      phone: data.phone ?? current.phone,
+    }))
+    setFormErrors((current) => ({ ...current, documentNumber: undefined }))
+    setSystemMessage('CPF/CNPJ encontrado na base Supabase. Dados do cliente preenchidos.')
+  }
+
+  async function lookupPhone(phone: string) {
+    const phoneDigits = onlyDigits(phone)
+    if (!phoneDigits) {
+      return
+    }
+
+    if (!isValidBrazilPhone(phoneDigits)) {
+      setFormErrors((current) => ({
+        ...current,
+        phone: 'Nao validado: telefone brasileiro com DDD e numero real.',
+      }))
+      return
+    }
+
+    const localMatch = contracts.find((contract) => onlyDigits(contract.phone) === phoneDigits)
+    if (localMatch) {
+      setForm((current) => ({
+        ...current,
+        clientName: localMatch.clientName,
+        documentNumber: localMatch.documentNumber,
+        email: localMatch.email,
+      }))
+      setFormErrors((current) => ({ ...current, phone: undefined }))
+      setSystemMessage('Telefone encontrado na base local. Dados do cliente preenchidos.')
+      return
+    }
+
+    if (!isSupabaseConfigured || !supabase) {
+      setFormErrors((current) => ({ ...current, phone: undefined }))
+      setSystemMessage('Telefone validado. Supabase nao configurado para consulta em rede.')
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('clients')
+      .select('full_name, document_number, email, phone')
+      .eq('phone_digits', phoneDigits)
+      .maybeSingle()
+
+    if (error) {
+      setSystemMessage('Telefone validado, mas a consulta no Supabase nao respondeu.')
+      return
+    }
+
+    if (!data) {
+      setFormErrors((current) => ({ ...current, phone: undefined }))
+      setSystemMessage('Telefone valido e livre para novo cadastro.')
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      clientName: data.full_name ?? current.clientName,
+      documentNumber: formatDocument(data.document_number ?? current.documentNumber),
+      email: data.email ?? current.email,
+      phone: formatPhone(data.phone ?? current.phone),
+    }))
+    setFormErrors((current) => ({ ...current, phone: undefined }))
+    setSystemMessage('Telefone encontrado na base Supabase. Dados do cliente preenchidos.')
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -229,8 +602,9 @@ function App() {
       date: form.date,
     }
 
-    if (!nextContract.clientName || !nextContract.requestedBy || !nextContract.value || !nextContract.date) {
-      setSystemMessage('Preencha referencia, cliente, valor e data para salvar.')
+    const nextErrors = validateForm(nextContract)
+    if (Object.keys(nextErrors).length > 0) {
+      setSystemMessage('Cadastro bloqueado: corrija os campos nao validados.')
       return
     }
 
@@ -240,7 +614,10 @@ function App() {
         .insert({
           full_name: nextContract.clientName,
           document_number: nextContract.documentNumber || null,
+          document_digits: onlyDigits(nextContract.documentNumber) || null,
+          email_domain: getEmailDomain(nextContract.email) || null,
           email: nextContract.email || null,
+          phone_digits: onlyDigits(nextContract.phone) || null,
           phone: nextContract.phone || null,
         })
         .select('id')
@@ -262,6 +639,8 @@ function App() {
           risk: nextContract.status === 'overdue' ? 'high' : 'low',
           guarantee_type: 'Contrato',
           requested_by: nextContract.requestedBy,
+          duration_indefinite: nextContract.duration === 'indefinite',
+          duration_months: nextContract.duration === 'indefinite' ? null : Number(nextContract.duration),
           due_date: nextContract.date,
         })
         .select('id')
@@ -281,6 +660,7 @@ function App() {
       isSupabaseConfigured ? 'Contrato salvo no Supabase.' : 'Contrato salvo localmente.',
     )
     setForm(emptyForm)
+    setFormErrors({})
   }
 
   async function removeContract(contract: Contract) {
@@ -307,7 +687,9 @@ function App() {
     <main className="app-shell">
       <aside className="sidebar" aria-label="Navegacao principal">
         <div className="brand">
-          <img className="brand-logo" src="/brand/mts-appjus-logo.png" alt="MTS AppJus" />
+          <span className="brand-logo-frame">
+            <img className="brand-logo" src="/brand/mts-appjus-logo.png" alt="MTS AppJus" />
+          </span>
           <div>
             <strong>MTS AppJus</strong>
             <span>Acordos privados</span>
@@ -347,6 +729,7 @@ function App() {
           <div>
             <span className="eyebrow">Gestao discreta e segura de acordos privados</span>
             <h1>Base operacional</h1>
+            <p className="title-support">Controle de contratos, clientes, datas reais e documentos vinculados.</p>
           </div>
           <div className="topbar-actions">
             <label className="search-box">
@@ -407,24 +790,53 @@ function App() {
             </div>
 
             <div className="contract-list">
+              <div className="contract-tabs" aria-label="Filtrar contratos por status">
+                {[
+                  { label: 'Todos', value: 'all' as ContractTab },
+                  { label: 'Ativos', value: 'active' as ContractTab },
+                  { label: 'Pausados', value: 'paused' as ContractTab },
+                  { label: 'Inadimplentes', value: 'overdue' as ContractTab },
+                ].map((tab) => {
+                  const count =
+                    tab.value === 'all'
+                      ? contracts.length
+                      : contracts.filter((contract) => contract.status === tab.value).length
+                  return (
+                    <button
+                      className={contractTab === tab.value ? 'active' : undefined}
+                      key={tab.value}
+                      onClick={() => setContractTab(tab.value)}
+                      type="button"
+                    >
+                      {tab.label}
+                      <span>{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
               <div className="contract-header">
                 <span>Nome</span>
                 <span>Valor</span>
                 <span>Data</span>
+                <span>Tempo</span>
                 <span>Status</span>
                 <span></span>
               </div>
-              {filteredContracts.length > 0 ? (
-                filteredContracts.map((contract) => (
+              {pagedContracts.length > 0 ? (
+                pagedContracts.map((contract) => (
                   <div className="contract-row" key={contract.id}>
                     <div>
                       <strong>{contract.clientName}</strong>
-                      <span>{contract.id}</span>
+                      <span>
+                        {contract.id}
+                        {contract.email ? ` - ${getEmailDomain(contract.email)}` : ''}
+                      </span>
                     </div>
                     <strong>{contract.value}</strong>
                     <time dateTime={contract.date}>{formatDate(contract.date)}</time>
+                    <span>{formatDuration(contract.duration)}</span>
                     <span className={`status-badge status-${contract.status}`}>
-                      {contract.status === 'active' ? 'Ativo' : 'Inadimplente'}
+                      {contractStatusLabels[contract.status]}
                     </span>
                     <button
                       className="icon-button remove-button"
@@ -442,6 +854,31 @@ function App() {
                   <span>Use a guia Cadastro para juristas para inserir o primeiro contrato.</span>
                 </div>
               )}
+              {filteredContracts.length > 0 ? (
+                <div className="pagination-bar">
+                  <span>
+                    Pagina {currentPage} de {totalPages}
+                  </span>
+                  <div>
+                    <button
+                      className="ghost-button"
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                      type="button"
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      className="ghost-button"
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                      type="button"
+                    >
+                      Proxima
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </article>
 
@@ -459,11 +896,15 @@ function App() {
                 <label>
                   Nome da referência
                   <input
+                    aria-invalid={Boolean(formErrors.requestedBy)}
+                    className={formErrors.requestedBy ? 'field-invalid' : undefined}
+                    onBlur={() => validateAndMarkField('requestedBy')}
                     onChange={(event) => updateForm('requestedBy', event.target.value)}
                     placeholder="Quem solicitou o crédito"
                     required
                     value={form.requestedBy}
                   />
+                  {formErrors.requestedBy ? <small className="field-error">{formErrors.requestedBy}</small> : null}
                 </label>
               </fieldset>
 
@@ -472,36 +913,62 @@ function App() {
                 <label>
                   Nome do cliente
                   <input
+                    aria-invalid={Boolean(formErrors.clientName)}
+                    className={formErrors.clientName ? 'field-invalid' : undefined}
+                    onBlur={() => validateAndMarkField('clientName')}
                     onChange={(event) => updateForm('clientName', event.target.value)}
                     placeholder="Nome completo ou razão social"
                     required
                     value={form.clientName}
                   />
+                  {formErrors.clientName ? <small className="field-error">{formErrors.clientName}</small> : null}
                 </label>
                 <label>
                   CPF ou CNPJ
                   <input
+                    aria-invalid={Boolean(formErrors.documentNumber)}
+                    className={formErrors.documentNumber ? 'field-invalid' : undefined}
+                    inputMode="numeric"
+                    onBlur={(event) => void lookupDocument(event.target.value)}
                     onChange={(event) => updateForm('documentNumber', event.target.value)}
                     placeholder="Documento do cliente"
+                    required
                     value={form.documentNumber}
                   />
+                  {formErrors.documentNumber ? <small className="field-error">{formErrors.documentNumber}</small> : null}
                 </label>
                 <label>
                   Telefone
                   <input
+                    aria-invalid={Boolean(formErrors.phone)}
+                    className={formErrors.phone ? 'field-invalid' : undefined}
+                    inputMode="tel"
+                    onBlur={(event) => void lookupPhone(event.target.value)}
                     onChange={(event) => updateForm('phone', event.target.value)}
                     placeholder="(00) 00000-0000"
+                    required
                     value={form.phone}
                   />
+                  {formErrors.phone ? <small className="field-error">{formErrors.phone}</small> : null}
                 </label>
                 <label>
                   E-mail
-                  <input
-                    onChange={(event) => updateForm('email', event.target.value)}
-                    placeholder="cliente@email.com"
-                    type="email"
-                    value={form.email}
-                  />
+                  <span className={`email-field ${formErrors.email ? 'field-invalid' : ''}`}>
+                    <Mail size={16} aria-hidden="true" />
+                    <input
+                      aria-invalid={Boolean(formErrors.email)}
+                      onBlur={() => validateAndMarkField('email')}
+                      onChange={(event) => updateForm('email', event.target.value)}
+                      placeholder="cliente@email.com"
+                      type="email"
+                      value={form.email}
+                    />
+                  </span>
+                  {formErrors.email ? (
+                    <small className="field-error">{formErrors.email}</small>
+                  ) : form.email ? (
+                    <small>Dominio vinculado: {getEmailDomain(form.email) || 'informe o dominio'}</small>
+                  ) : null}
                 </label>
               </fieldset>
 
@@ -510,20 +977,42 @@ function App() {
                 <label>
                   Valor do contrato
                   <input
+                    aria-invalid={Boolean(formErrors.value)}
+                    className={formErrors.value ? 'field-invalid' : undefined}
+                    onBlur={() => validateAndMarkField('value')}
                     onChange={(event) => updateForm('value', event.target.value)}
                     placeholder="R$ 0,00"
                     required
                     value={form.value}
                   />
+                  {formErrors.value ? <small className="field-error">{formErrors.value}</small> : null}
                 </label>
                 <label>
                   Data
                   <input
+                    aria-invalid={Boolean(formErrors.date)}
+                    className={formErrors.date ? 'field-invalid' : undefined}
+                    min={todayIso}
+                    onBlur={() => validateAndMarkField('date')}
                     onChange={(event) => updateForm('date', event.target.value)}
                     required
                     type="date"
                     value={form.date}
                   />
+                  {formErrors.date ? <small className="field-error">{formErrors.date}</small> : null}
+                </label>
+                <label>
+                  Tempo do contrato
+                  <select
+                    onChange={(event) => updateForm('duration', event.target.value)}
+                    value={form.duration}
+                  >
+                    {contractDurationOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label>
                   Status
@@ -532,12 +1021,14 @@ function App() {
                     value={form.status}
                   >
                     <option value="active">Contrato ativo</option>
+                    <option value="paused">Contrato pausado</option>
                     <option value="overdue">Contrato inadimplente</option>
                   </select>
                 </label>
               </fieldset>
 
               <button className="primary-button full" type="submit">
+                <ShieldCheck size={18} aria-hidden="true" />
                 Salvar contrato
                 <ChevronRight size={18} aria-hidden="true" />
               </button>

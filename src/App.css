@@ -41,22 +41,19 @@
 
 .brand,
 .security-panel,
-.wide-panel,
-.deadline-card,
 .topbar-actions,
-.panel-heading,
-.table-row,
-.audit-list li {
+.panel-heading {
   display: flex;
   align-items: center;
 }
 
 .brand {
   gap: 12px;
-  align-items: flex-start;
+  align-items: center;
+  min-height: 76px;
 }
 
-.brand-logo,
+.brand-logo-frame,
 .metric-icon,
 .icon-button {
   display: inline-flex;
@@ -64,14 +61,22 @@
   justify-content: center;
 }
 
-.brand-logo {
-  width: 70px;
-  height: 70px;
+.brand-logo-frame {
+  width: 86px;
+  height: 86px;
+  flex: 0 0 86px;
+  overflow: hidden;
   border-radius: 8px;
-  object-fit: cover;
-  object-position: left center;
   border: 1px solid rgba(216, 185, 107, 0.34);
+  background: #081016;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+}
+
+.brand-logo {
+  width: 236px;
+  height: 86px;
+  object-fit: cover;
+  object-position: 10% center;
 }
 
 .brand strong,
@@ -79,17 +84,14 @@
 .security-panel strong,
 .security-panel span,
 .metric-card span,
-.metric-card small,
-.table-row span,
-.workflow-item span,
-.wide-panel span,
-.deadline-card span {
+.metric-card small {
   display: block;
 }
 
 .brand strong {
   color: var(--brand-500);
-  font-size: 20px;
+  font-size: 19px;
+  line-height: 1.1;
 }
 
 .brand span,
@@ -143,12 +145,14 @@
   border-radius: 8px;
   background: #081016;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
+  min-height: clamp(260px, 28vw, 430px);
 }
 
 .brand-hero img {
   display: block;
   width: 100%;
-  height: clamp(120px, 18vw, 210px);
+  height: 100%;
+  min-height: inherit;
   object-fit: cover;
   object-position: center;
 }
@@ -176,11 +180,19 @@ p {
 
 h1 {
   max-width: 920px;
-  margin-top: 8px;
+  margin-top: 6px;
   color: #f8fafc;
-  font-size: 34px;
+  font-size: 32px;
   line-height: 1.12;
   font-weight: 760;
+}
+
+.title-support {
+  max-width: 620px;
+  margin-top: 8px;
+  color: var(--ink-500);
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 h2 {
@@ -217,6 +229,26 @@ select {
   color: var(--ink-700);
   font: inherit;
   outline: none;
+}
+
+input.field-invalid,
+select.field-invalid,
+.email-field.field-invalid {
+  border-color: rgba(217, 56, 56, 0.86);
+  box-shadow: 0 0 0 3px rgba(217, 56, 56, 0.12);
+}
+
+.field-error {
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(217, 56, 56, 0.46);
+  border-radius: 7px;
+  padding: 7px 9px;
+  background: rgba(217, 56, 56, 0.12);
+  color: #ffd7d2;
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .search-box input {
@@ -277,9 +309,7 @@ select {
 }
 
 .metric-card,
-.panel,
-.wide-panel,
-.deadline-card {
+.panel {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -337,11 +367,12 @@ select {
 }
 
 .content-grid.clean {
-  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 380px);
   align-items: start;
 }
 
 .panel {
+  min-width: 0;
   padding: 20px;
 }
 
@@ -351,12 +382,9 @@ select {
   margin-bottom: 18px;
 }
 
-.operations-panel {
-  min-height: 350px;
-}
-
 .contracts-panel {
   min-height: 390px;
+  overflow: hidden;
 }
 
 .top-tabs {
@@ -393,14 +421,58 @@ select {
 .contract-list {
   display: grid;
   gap: 10px;
+  min-width: 0;
+}
+
+.contract-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.contract-tabs button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: var(--surface-soft);
+  color: var(--ink-700);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.contract-tabs button:hover,
+.contract-tabs .active {
+  border-color: rgba(216, 185, 107, 0.56);
+  background: rgba(216, 185, 107, 0.12);
+  color: #fff7df;
+}
+
+.contract-tabs span {
+  min-width: 20px;
+  border-radius: 999px;
+  padding: 2px 6px;
+  background: rgba(216, 185, 107, 0.16);
+  color: var(--brand-500);
+  text-align: center;
+  font-size: 11px;
 }
 
 .contract-header,
 .contract-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) 150px 130px 130px 44px;
-  gap: 12px;
+  grid-template-columns: minmax(170px, 1.3fr) minmax(92px, 0.75fr) minmax(96px, 0.75fr) minmax(120px, 0.9fr) minmax(104px, 0.75fr) 38px;
+  gap: 10px;
   align-items: center;
+  min-width: 0;
 }
 
 .contract-header {
@@ -413,28 +485,42 @@ select {
 
 .contract-row {
   min-height: 70px;
-  padding: 12px 14px;
+  padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
 }
 
+.contract-row > *,
+.contract-header > * {
+  min-width: 0;
+}
+
 .contract-row strong {
   color: #ffffff;
+  overflow-wrap: anywhere;
+}
+
+.contract-row > div:first-child {
+  display: grid;
+  gap: 3px;
 }
 
 .contract-row span,
 .contract-row time {
   color: var(--ink-500);
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .status-badge {
   width: fit-content;
+  max-width: 100%;
   border-radius: 999px;
   padding: 5px 9px;
   font-size: 12px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .status-active {
@@ -442,9 +528,42 @@ select {
   color: #f1d98f;
 }
 
+.status-paused {
+  background: rgba(145, 160, 173, 0.22);
+  color: #dbe4ea;
+}
+
 .status-overdue {
   background: #fee6e2;
   color: var(--danger);
+}
+
+.pagination-bar {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  margin-top: 6px;
+  padding-top: 12px;
+  color: var(--ink-500);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.pagination-bar div {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-bar .ghost-button {
+  min-height: 36px;
+}
+
+.ghost-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .remove-button {
@@ -490,56 +609,6 @@ select {
   font-weight: 800;
 }
 
-.table {
-  display: grid;
-  gap: 10px;
-}
-
-.table-row {
-  min-height: 68px;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr 1fr 84px 64px;
-  gap: 14px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fbfdfc;
-}
-
-.table-row strong {
-  color: var(--ink-950);
-}
-
-.table-row span,
-.table-row div,
-.due {
-  color: var(--ink-500);
-  font-size: 14px;
-}
-
-.risk {
-  width: fit-content;
-  border-radius: 999px;
-  padding: 5px 9px;
-  font-weight: 800;
-  font-size: 12px;
-}
-
-.risk-baixo {
-  background: #e7f5ef;
-  color: #1d6b55;
-}
-
-.risk-medio {
-  background: #fff5d7;
-  color: #8a6111;
-}
-
-.risk-alto {
-  background: #fee6e2;
-  color: #b42318;
-}
-
 .intake-form {
   display: grid;
   gap: 14px;
@@ -579,172 +648,33 @@ select {
   font-weight: 500;
 }
 
+.intake-form small {
+  color: var(--ink-500);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.email-field {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  padding: 0 12px;
+  color: var(--brand-500);
+}
+
+.email-field input {
+  min-height: auto;
+  border: 0;
+  padding: 0;
+}
+
 .full {
   width: 100%;
   margin-top: 4px;
-}
-
-.workflow-list,
-.audit-list {
-  display: grid;
-  gap: 14px;
-}
-
-.workflow-item {
-  display: grid;
-  gap: 8px;
-}
-
-.workflow-item div:first-child {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.workflow-item strong,
-.audit-list span,
-.wide-panel strong,
-.deadline-card strong {
-  color: var(--ink-950);
-}
-
-.progress-track {
-  height: 9px;
-  border-radius: 999px;
-  overflow: hidden;
-  background: #e7ece9;
-}
-
-.progress-track span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--brand-700);
-}
-
-.audit-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.audit-list li {
-  align-items: flex-start;
-  gap: 10px;
-  padding-bottom: 13px;
-  border-bottom: 1px solid var(--line);
-}
-
-.audit-list li:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-}
-
-.audit-list svg {
-  flex: 0 0 auto;
-  margin-top: 2px;
-  color: var(--brand-700);
-}
-
-.bottom-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 16px;
-}
-
-.wide-panel,
-.deadline-card {
-  padding: 20px;
-}
-
-.wide-panel {
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.wide-panel > div,
-.deadline-card {
-  display: grid;
-  gap: 8px;
-}
-
-.wide-panel svg,
-.deadline-card svg {
-  color: var(--brand-700);
-}
-
-.figma-section {
-  display: grid;
-  gap: 16px;
-}
-
-.section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.ghost-link {
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid #d7e5dc;
-  border-radius: 8px;
-  padding: 0 14px;
-  background: var(--surface);
-  color: var(--brand-900);
-  text-decoration: none;
-  font-weight: 800;
-}
-
-.figma-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(180px, 1fr));
-  gap: 14px;
-}
-
-.figma-card {
-  overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--surface);
-  box-shadow: 0 18px 40px rgba(22, 33, 48, 0.07);
-}
-
-.figma-card a {
-  display: block;
-  height: 240px;
-  overflow: hidden;
-  background: var(--page);
-  border-bottom: 1px solid var(--line);
-}
-
-.figma-card img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top left;
-}
-
-.figma-card div {
-  display: grid;
-  gap: 6px;
-  padding: 14px;
-}
-
-.figma-card strong {
-  color: var(--ink-950);
-  font-size: 15px;
-}
-
-.figma-card span {
-  color: var(--ink-500);
-  font-size: 13px;
-  line-height: 1.45;
 }
 
 @media (max-width: 1180px) {
@@ -772,13 +702,8 @@ select {
 
   .topbar,
   .content-grid,
-  .content-grid.clean,
-  .bottom-grid {
+  .content-grid.clean {
     grid-template-columns: 1fr;
-  }
-
-  .figma-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -815,10 +740,6 @@ select {
     width: 100%;
   }
 
-  .table-row {
-    grid-template-columns: 1fr;
-  }
-
   .metric-grid.compact,
   .contract-row {
     grid-template-columns: 1fr;
@@ -852,25 +773,14 @@ select {
     gap: 8px;
   }
 
+  .pagination-bar,
+  .pagination-bar div {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .remove-button {
     width: 100%;
   }
 
-  .wide-panel {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .section-heading {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .ghost-link {
-    width: 100%;
-  }
-
-  .figma-grid {
-    grid-template-columns: 1fr;
-  }
 }

@@ -6,6 +6,7 @@ create type public.operation_status as enum (
   'document_review',
   'signature_pending',
   'active',
+  'paused',
   'overdue',
   'closed'
 );
@@ -16,8 +17,11 @@ create table public.clients (
   id uuid primary key default gen_random_uuid(),
   full_name text not null,
   document_number text,
+  document_digits text,
   email text,
+  email_domain text,
   phone text,
+  phone_digits text,
   created_at timestamptz not null default now()
 );
 
@@ -30,6 +34,8 @@ create table public.operations (
   risk public.risk_level not null default 'medium',
   guarantee_type text,
   requested_by text,
+  duration_months integer check (duration_months between 1 and 12),
+  duration_indefinite boolean not null default true,
   due_date date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -66,6 +72,9 @@ create table public.audit_logs (
 
 create index operations_client_id_idx on public.operations(client_id);
 create index operations_status_idx on public.operations(status);
+create index clients_document_digits_idx on public.clients(document_digits);
+create index clients_email_domain_idx on public.clients(email_domain);
+create index clients_phone_digits_idx on public.clients(phone_digits);
 create index documents_operation_id_idx on public.documents(operation_id);
 create index compliance_checks_operation_id_idx on public.compliance_checks(operation_id);
 create index audit_logs_operation_id_idx on public.audit_logs(operation_id);
