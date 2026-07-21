@@ -3,7 +3,7 @@
 ## Link atual por Workers
 
 ```text
-https://mts-appjus.tsmarcio.workers.dev
+https://mtsappjus.tsmarcio.workers.dev
 ```
 
 O projeto esta configurado para publicar como Cloudflare Worker pelo comando:
@@ -15,12 +15,12 @@ npm run deploy:cloudflare
 O `wrangler.toml` usa:
 
 ```toml
-name = "mts-appjus"
+name = "mtsappjus"
 main = "dist/server/index.js"
 workers_dev = true
 ```
 
-Isso troca o Worker antigo `appjus` para `mts-appjus`.
+Isso troca o Worker antigo `appjus` para `mtsappjus`, que e o servico aberto no painel Cloudflare.
 
 Importante: em links gratuitos de Workers, o formato sempre e:
 
@@ -31,7 +31,7 @@ https://nome-do-worker.subdominio-da-conta.workers.dev
 Por isso o trecho `tsmarcio` nao vem do codigo. Ele e o subdominio da conta Cloudflare. Para tirar esse nome do link gratis, altere o subdominio `workers.dev` da conta no painel Cloudflare, se a conta permitir. Exemplo:
 
 ```text
-https://mts-appjus.mtsappjus.workers.dev
+https://mtsappjus.mtsappjus.workers.dev
 ```
 
 Para um link totalmente profissional/oculto, a melhor opcao e usar dominio proprio no Cloudflare.
@@ -62,7 +62,7 @@ Deploy command: npx wrangler deploy
 O link esperado, mantendo o subdominio atual da conta, sera:
 
 ```text
-https://mts-appjus.tsmarcio.workers.dev
+https://mtsappjus.tsmarcio.workers.dev
 ```
 
 ## Alternativa por Pages
