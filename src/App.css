@@ -219,8 +219,8 @@
   border-radius: 8px;
   background: #081016;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
-  min-height: clamp(150px, 17vw, 245px);
-  padding: clamp(8px, 1vw, 14px);
+  min-height: clamp(96px, 11vw, 150px);
+  padding: 8px;
 }
 
 .brand-hero img {
@@ -878,8 +878,8 @@ select.field-invalid,
   }
 
   .brand-hero {
-    min-height: 108px;
-    padding: 8px;
+    min-height: 72px;
+    padding: 6px;
   }
 
   h1 {
