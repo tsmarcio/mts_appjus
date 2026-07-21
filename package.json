@@ -9,7 +9,6 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && wrangler deploy",
-    "deploy:cloudflare-pages": "npm run build && wrangler pages deploy dist --project-name=mts-appjus",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",

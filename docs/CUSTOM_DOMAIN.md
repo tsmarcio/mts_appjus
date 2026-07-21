@@ -25,20 +25,4 @@ Workers & Pages > mtsappjus > Settings > Domains & Routes
 
 Depois selecione `Add Custom Domain` e informe o dominio escolhido.
 
-## GitHub Pages
-
-GitHub Pages tambem funciona, mas o link gratuito mostra `github.io`. Para esconder isso, precisa de dominio proprio configurado em:
-
-```text
-Settings > Pages > Custom domain
-```
-
-Depois que o DNS estiver propagado, crie um arquivo `public/CNAME` com o dominio exato.
-
-Exemplo:
-
-```text
-app.mtsinforj.com.br
-```
-
-Sem dominio proprio, o GitHub Pages sempre exibira `github.io`.
+Depois que o DNS estiver propagado, use esse dominio em `Add Custom Domain`.

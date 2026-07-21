@@ -321,7 +321,7 @@ Build command: npm run build
 Deploy command: npx wrangler deploy
 ```
 
-O workflow `.github/workflows/cloudflare-pages.yml` publica automaticamente a branch `main` no Cloudflare Worker quando os secrets estiverem configurados:
+O workflow `.github/workflows/cloudflare-worker.yml` publica automaticamente a branch `main` no Cloudflare Worker quando os secrets estiverem configurados:
 
 ```text
 CLOUDFLARE_API_TOKEN
@@ -510,7 +510,7 @@ Recomendacao inicial:
 
 Opcoes recomendadas:
 
-- Frontend: Vercel, Netlify ou GitHub Pages.
+- Frontend: Cloudflare Workers.
 - Backend: Render, Railway, Fly.io, AWS ou Azure.
 - Banco: Supabase, Neon, Railway PostgreSQL ou RDS.
 - CI/CD: GitHub Actions.
