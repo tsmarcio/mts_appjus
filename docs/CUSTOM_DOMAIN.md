@@ -1,37 +1,39 @@
 # Dominio customizado
 
-O GitHub Pages padrao mostra o usuario e repositorio:
+O link publico recomendado para este projeto e Cloudflare Workers.
+
+Link gratis desejado:
 
 ```text
-https://tsmarcio.github.io/mts_appjus/
+https://mtsappjus.mtsappjus.workers.dev
 ```
 
-Para ocultar GitHub no link publico, use um dominio proprio, por exemplo:
+Para ocultar completamente a plataforma no link publico, use um dominio proprio, por exemplo:
 
 ```text
 app.mtsinforj.com.br
 appjus.seudominio.com
 ```
 
-Passos:
+## Cloudflare Workers
 
-1. No provedor do dominio, crie um registro `CNAME` apontando para:
+No Cloudflare, abra:
 
 ```text
-tsmarcio.github.io
+Workers & Pages > mtsappjus > Settings > Domains & Routes
 ```
 
-2. No GitHub, abra:
+Depois selecione `Add Custom Domain` e informe o dominio escolhido.
+
+## GitHub Pages
+
+GitHub Pages tambem funciona, mas o link gratuito mostra `github.io`. Para esconder isso, precisa de dominio proprio configurado em:
 
 ```text
 Settings > Pages > Custom domain
 ```
 
-3. Informe o dominio escolhido e salve.
-
-4. Ative `Enforce HTTPS`.
-
-5. Depois que o DNS estiver propagado, crie um arquivo `public/CNAME` com o dominio exato.
+Depois que o DNS estiver propagado, crie um arquivo `public/CNAME` com o dominio exato.
 
 Exemplo:
 
@@ -39,4 +41,4 @@ Exemplo:
 app.mtsinforj.com.br
 ```
 
-Sem dominio proprio ou outra plataforma com login configurado, o GitHub Pages sempre exibira `github.io`.
+Sem dominio proprio, o GitHub Pages sempre exibira `github.io`.

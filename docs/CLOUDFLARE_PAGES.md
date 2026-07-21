@@ -1,9 +1,9 @@
 # Cloudflare Workers / Pages
 
-## Link atual por Workers
+## Link desejado por Workers
 
 ```text
-https://mtsappjus.tsmarcio.workers.dev
+https://mtsappjus.mtsappjus.workers.dev
 ```
 
 O projeto esta configurado para publicar como Cloudflare Worker pelo comando:
@@ -28,13 +28,33 @@ Importante: em links gratuitos de Workers, o formato sempre e:
 https://nome-do-worker.subdominio-da-conta.workers.dev
 ```
 
-Por isso o trecho `tsmarcio` nao vem do codigo. Ele e o subdominio da conta Cloudflare. Para tirar esse nome do link gratis, altere o subdominio `workers.dev` da conta no painel Cloudflare, se a conta permitir. Exemplo:
+Por isso o segundo trecho do link nao vem do codigo. Ele e o subdominio `workers.dev` da conta Cloudflare. Para deixar tudo como `mtsappjus`, altere o subdominio `workers.dev` da conta no painel Cloudflare para `mtsappjus`.
 
 ```text
 https://mtsappjus.mtsappjus.workers.dev
 ```
 
 Para um link totalmente profissional/oculto, a melhor opcao e usar dominio proprio no Cloudflare.
+
+## Onde alterar no Cloudflare
+
+No painel Cloudflare:
+
+```text
+Workers & Pages > Overview
+```
+
+No bloco lateral de subdominio `workers.dev`, clique em `Change` ou `Alterar` e informe:
+
+```text
+mtsappjus
+```
+
+Depois disso, o link gratis esperado fica:
+
+```text
+https://mtsappjus.mtsappjus.workers.dev
+```
 
 ## Secrets no GitHub
 
@@ -59,44 +79,20 @@ Build command: npm run build
 Deploy command: npx wrangler deploy
 ```
 
-O link esperado, mantendo o subdominio atual da conta, sera:
+O link esperado, apos mudar o subdominio da conta para `mtsappjus`, sera:
 
 ```text
-https://mtsappjus.tsmarcio.workers.dev
-```
-
-## Alternativa por Pages
-
-Se quiser gerar exatamente:
-
-```text
-https://mts-appjus.pages.dev
-```
-
-crie um projeto em Cloudflare Pages, nao Workers, com:
-
-```text
-Project name: mts-appjus
-Framework preset: Vite
-Build command: npm run build
-Build output directory: dist
-Deploy command: deixe vazio
-```
-
-No terminal, o deploy manual por Pages continua disponivel:
-
-```bash
-npm run deploy:cloudflare-pages
+https://mtsappjus.mtsappjus.workers.dev
 ```
 
 ## Como identificar a configuracao errada
 
-Se o log mostrar:
+Se o log mostrar um Worker antigo ou outro subdominio de conta:
 
 ```text
 Executing user deploy command: npx wrangler deploy
 Uploaded appjus
-https://appjus.tsmarcio.workers.dev
+https://appjus.<subdominio-da-conta>.workers.dev
 ```
 
-voce criou/publicou como Workers, nao como Pages.
+o nome do Worker ou o subdominio da conta ainda nao estao alinhados.

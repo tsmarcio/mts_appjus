@@ -108,7 +108,7 @@ Esse aviso e apenas para compilar aplicativos Flutter Windows desktop. Para Flut
 Remote atual:
 
 ```text
-origin  https://github.com/tsmarcio/mts_appjus.git
+origin  repositorio GitHub do projeto
 ```
 
 Branch local:
@@ -303,30 +303,45 @@ VITE_SUPABASE_ANON_KEY=sua_anon_key_publica
 
 Sem essas variaveis, o app continua em modo local/demo e salva dados apenas no navegador.
 
-## GitHub Pages
+## Publicacao Online
 
-O projeto esta preparado para GitHub Pages em:
+O link publico recomendado para este sistema e Cloudflare Workers.
+
+Link desejado depois de alterar o subdominio `workers.dev` da conta Cloudflare para `mtsappjus`:
 
 ```text
-https://tsmarcio.github.io/mts_appjus/
+https://mtsappjus.mtsappjus.workers.dev
 ```
 
-O workflow `.github/workflows/pages.yml` faz build automatico da `main`.
+Configuracao atual do Worker:
 
-Para esconder `github.io` do link publico, e necessario configurar um dominio proprio em `Settings > Pages > Custom domain`. Guia do projeto:
+```text
+Worker: mtsappjus
+Build command: npm run build
+Deploy command: npx wrangler deploy
+```
+
+O workflow `.github/workflows/cloudflare-pages.yml` publica automaticamente a branch `main` no Cloudflare Worker quando os secrets estiverem configurados:
+
+```text
+CLOUDFLARE_API_TOKEN
+CLOUDFLARE_ACCOUNT_ID
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
+
+Para dominio proprio ou rotas customizadas:
 
 ```text
 docs/CUSTOM_DOMAIN.md
 ```
 
-Para o GitHub Pages usar Supabase online, cadastre os secrets do repositorio:
+Para o site publicado usar Supabase online, cadastre os secrets:
 
 ```text
 VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 ```
-
-Depois, ajuste o workflow para expor esses secrets no passo `Build`.
 
 ## Docker
 
