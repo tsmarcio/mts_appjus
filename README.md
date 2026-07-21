@@ -313,6 +313,12 @@ https://tsmarcio.github.io/mts_appjus/
 
 O workflow `.github/workflows/pages.yml` faz build automatico da `main`.
 
+Para esconder `github.io` do link publico, e necessario configurar um dominio proprio em `Settings > Pages > Custom domain`. Guia do projeto:
+
+```text
+docs/CUSTOM_DOMAIN.md
+```
+
 Para o GitHub Pages usar Supabase online, cadastre os secrets do repositorio:
 
 ```text
