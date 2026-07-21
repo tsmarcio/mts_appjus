@@ -1,3 +1,8 @@
 name = "mts-appjus"
+main = "dist/server/index.js"
 compatibility_date = "2026-07-21"
-pages_build_output_dir = "dist"
+workers_dev = true
+preview_urls = false
+
+[observability]
+enabled = true
