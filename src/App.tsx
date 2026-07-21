@@ -17,10 +17,12 @@ import {
 } from 'lucide-react'
 import './App.css'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
+import type { Session } from '@supabase/supabase-js'
 
 type ContractStatus = 'active' | 'paused' | 'overdue'
 type ContractDuration = 'indefinite' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12'
 type ContractTab = 'all' | ContractStatus
+type AuthMode = 'sign-in' | 'sign-up'
 
 type Contract = {
   id: string
@@ -35,6 +37,18 @@ type Contract = {
   date: string
   status: ContractStatus
   duration: ContractDuration
+}
+
+type Tenant = {
+  id: string
+  name: string
+  subscriptionStatus: 'trialing' | 'active' | 'past_due' | 'canceled'
+}
+
+type AuthForm = {
+  email: string
+  password: string
+  organizationName: string
 }
 
 type ContractForm = Omit<Contract, 'id'>
@@ -67,6 +81,30 @@ type OperationRow = {
     | null
 }
 
+type MembershipRow = {
+  tenant_id: string
+  tenants:
+    | {
+        id: string
+        name: string
+        subscriptions:
+          | {
+              status: Tenant['subscriptionStatus']
+            }[]
+          | null
+      }
+    | {
+        id: string
+        name: string
+        subscriptions:
+          | {
+              status: Tenant['subscriptionStatus']
+            }[]
+          | null
+      }[]
+    | null
+}
+
 const emptyForm: ContractForm = {
   clientName: '',
   documentNumber: '',
@@ -77,6 +115,12 @@ const emptyForm: ContractForm = {
   date: '',
   status: 'active',
   duration: 'indefinite',
+}
+
+const emptyAuthForm: AuthForm = {
+  email: '',
+  password: '',
+  organizationName: '',
 }
 
 const storageKey = 'mts-appjus-contracts-v2'
@@ -263,6 +307,11 @@ function App() {
   const [contracts, setContracts] = useState<Contract[]>(loadContracts)
   const [form, setForm] = useState<ContractForm>(emptyForm)
   const [formErrors, setFormErrors] = useState<FormErrors>({})
+  const [authMode, setAuthMode] = useState<AuthMode>('sign-in')
+  const [authForm, setAuthForm] = useState<AuthForm>(emptyAuthForm)
+  const [session, setSession] = useState<Session | null>(null)
+  const [tenant, setTenant] = useState<Tenant | null>(null)
+  const [authLoading, setAuthLoading] = useState(isSupabaseConfigured)
   const [query, setQuery] = useState('')
   const [contractTab, setContractTab] = useState<ContractTab>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -270,15 +319,78 @@ function App() {
   const todayIso = useMemo(getTodayIso, [])
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
 
+  async function loadTenant(currentSession: Session | null) {
+    if (!isSupabaseConfigured || !supabase || !currentSession) {
+      setTenant(null)
+      return null
+    }
+
+    const { data, error } = await supabase
+      .from('tenant_members')
+      .select('tenant_id, tenants(id, name, subscriptions(status))')
+      .eq('user_id', currentSession.user.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+
+    if (error) {
+      setSystemMessage('Nao foi possivel carregar a empresa do usuario.')
+      return null
+    }
+
+    const membership = data as MembershipRow | null
+    const tenantData = Array.isArray(membership?.tenants) ? membership?.tenants[0] : membership?.tenants
+    if (!tenantData) {
+      setSystemMessage('Usuario autenticado sem empresa vinculada. Crie uma conta nova ou solicite convite.')
+      return null
+    }
+
+    const subscription = tenantData.subscriptions?.[0]
+    const nextTenant: Tenant = {
+      id: tenantData.id,
+      name: tenantData.name,
+      subscriptionStatus: subscription?.status ?? 'trialing',
+    }
+
+    setTenant(nextTenant)
+    return nextTenant
+  }
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      setAuthLoading(false)
+      return
+    }
+
+    supabase.auth.getSession().then(async ({ data }) => {
+      setSession(data.session)
+      await loadTenant(data.session)
+      setAuthLoading(false)
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession)
+      if (!nextSession) {
+        setTenant(null)
+        setContracts([])
+      } else {
+        void loadTenant(nextSession)
+      }
+    })
+
+    return () => listener.subscription.unsubscribe()
+  }, [])
+
   useEffect(() => {
     async function loadSupabaseContracts() {
-      if (!isSupabaseConfigured || !supabase) {
+      if (!isSupabaseConfigured || !supabase || !session || !tenant) {
         return
       }
 
       const { data, error } = await supabase
         .from('operations')
         .select('id, code, principal_amount, status, duration_months, duration_indefinite, due_date, requested_by, client_id, clients(full_name, document_number, email, phone)')
+        .eq('tenant_id', tenant.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -315,7 +427,7 @@ function App() {
     }
 
     void loadSupabaseContracts()
-  }, [])
+  }, [session, tenant])
 
   const filteredContracts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
@@ -377,8 +489,112 @@ function App() {
 
   function persistContracts(nextContracts: Contract[], message = 'Alteracoes salvas no sistema.') {
     setContracts(nextContracts)
-    window.localStorage.setItem(storageKey, JSON.stringify(nextContracts))
+    if (!isSupabaseConfigured) {
+      window.localStorage.setItem(storageKey, JSON.stringify(nextContracts))
+    }
     setSystemMessage(message)
+  }
+
+  function updateAuthForm(field: keyof AuthForm, value: string) {
+    setAuthForm((current) => ({ ...current, [field]: value }))
+  }
+
+  async function createTenantForUser(currentSession: Session, organizationName: string) {
+    if (!supabase) {
+      return null
+    }
+
+    const tenantName = organizationName.trim() || `Base de ${currentSession.user.email ?? 'usuario'}`
+    const { data: tenantData, error: tenantError } = await supabase
+      .from('tenants')
+      .insert({ name: tenantName, owner_id: currentSession.user.id })
+      .select('id, name')
+      .single()
+
+    if (tenantError) {
+      setSystemMessage('Login feito, mas nao foi possivel criar a empresa.')
+      return null
+    }
+
+    await supabase.from('tenant_members').insert({
+      tenant_id: tenantData.id,
+      user_id: currentSession.user.id,
+      role: 'owner',
+    })
+
+    await supabase.from('subscriptions').insert({
+      tenant_id: tenantData.id,
+      status: 'trialing',
+      billing_email: currentSession.user.email,
+    })
+
+    const nextTenant: Tenant = {
+      id: tenantData.id,
+      name: tenantData.name,
+      subscriptionStatus: 'trialing',
+    }
+    setTenant(nextTenant)
+    return nextTenant
+  }
+
+  async function handleAuthSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!supabase) {
+      setSystemMessage('Supabase nao configurado para login online.')
+      return
+    }
+
+    setAuthLoading(true)
+    if (authMode === 'sign-up') {
+      const { data, error } = await supabase.auth.signUp({
+        email: authForm.email.trim(),
+        password: authForm.password,
+      })
+
+      if (error) {
+        setSystemMessage(error.message)
+        setAuthLoading(false)
+        return
+      }
+
+      if (data.session) {
+        setSession(data.session)
+        await createTenantForUser(data.session, authForm.organizationName)
+        setSystemMessage('Conta criada. Sua base isolada ja esta pronta.')
+      } else {
+        setSystemMessage('Conta criada. Confirme o e-mail antes de entrar.')
+      }
+    } else {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: authForm.email.trim(),
+        password: authForm.password,
+      })
+
+      if (error) {
+        setSystemMessage(error.message)
+        setAuthLoading(false)
+        return
+      }
+
+      setSession(data.session)
+      const loadedTenant = await loadTenant(data.session)
+      if (!loadedTenant && data.session) {
+        await createTenantForUser(data.session, authForm.organizationName)
+      }
+      setSystemMessage('Login realizado com sucesso.')
+    }
+
+    setAuthLoading(false)
+  }
+
+  async function handleSignOut() {
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
+    setSession(null)
+    setTenant(null)
+    setContracts([])
+    setSystemMessage('Sessao encerrada.')
   }
 
   function updateForm(field: keyof ContractForm, value: string) {
@@ -610,9 +826,15 @@ function App() {
     }
 
     if (isSupabaseConfigured && supabase) {
+      if (!tenant) {
+        setSystemMessage('Selecione ou crie uma empresa antes de cadastrar contratos.')
+        return
+      }
+
       const { data: client, error: clientError } = await supabase
         .from('clients')
         .insert({
+          tenant_id: tenant.id,
           full_name: nextContract.clientName,
           document_number: nextContract.documentNumber || null,
           document_digits: onlyDigits(nextContract.documentNumber) || null,
@@ -633,6 +855,7 @@ function App() {
       const { data: operation, error: operationError } = await supabase
         .from('operations')
         .insert({
+          tenant_id: tenant.id,
           code: nextContract.id,
           client_id: client.id,
           principal_amount: amount,
@@ -665,10 +888,10 @@ function App() {
   }
 
   async function removeContract(contract: Contract) {
-    if (isSupabaseConfigured && supabase && contract.operationId) {
-      await supabase.from('operations').delete().eq('id', contract.operationId)
+    if (isSupabaseConfigured && supabase && tenant && contract.operationId) {
+      await supabase.from('operations').delete().eq('id', contract.operationId).eq('tenant_id', tenant.id)
       if (contract.clientId) {
-        await supabase.from('clients').delete().eq('id', contract.clientId)
+        await supabase.from('clients').delete().eq('id', contract.clientId).eq('tenant_id', tenant.id)
       }
     }
 
@@ -676,12 +899,84 @@ function App() {
   }
 
   async function clearContracts() {
-    if (isSupabaseConfigured && supabase) {
-      await supabase.from('operations').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-      await supabase.from('clients').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    if (isSupabaseConfigured && supabase && tenant) {
+      await supabase.from('operations').delete().eq('tenant_id', tenant.id)
+      await supabase.from('clients').delete().eq('tenant_id', tenant.id)
     }
 
     persistContracts([], isSupabaseConfigured ? 'Base local e Supabase zerados.' : 'Base local zerada.')
+  }
+
+  if (authLoading) {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card">
+          <img src={brandLogoPath} alt="MTS AppJus" />
+          <strong>Carregando sua base segura...</strong>
+        </section>
+      </main>
+    )
+  }
+
+  if (isSupabaseConfigured && !session) {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card">
+          <img src={brandLogoPath} alt="MTS AppJus" />
+          <div>
+            <span className="eyebrow">Acesso mensal por usuario</span>
+            <h1>{authMode === 'sign-in' ? 'Entrar no sistema' : 'Criar minha base'}</h1>
+            <p>Cada login acessa somente a propria empresa, clientes e contratos.</p>
+          </div>
+          <form className="auth-form" onSubmit={handleAuthSubmit}>
+            {authMode === 'sign-up' ? (
+              <label>
+                Nome da empresa ou base
+                <input
+                  onChange={(event) => updateAuthForm('organizationName', event.target.value)}
+                  placeholder="Ex.: Juridico Silva"
+                  required
+                  value={authForm.organizationName}
+                />
+              </label>
+            ) : null}
+            <label>
+              E-mail
+              <input
+                onChange={(event) => updateAuthForm('email', event.target.value)}
+                placeholder="usuario@email.com"
+                required
+                type="email"
+                value={authForm.email}
+              />
+            </label>
+            <label>
+              Senha
+              <input
+                minLength={6}
+                onChange={(event) => updateAuthForm('password', event.target.value)}
+                placeholder="Minimo 6 caracteres"
+                required
+                type="password"
+                value={authForm.password}
+              />
+            </label>
+            <button className="primary-button full" type="submit">
+              <ShieldCheck size={18} aria-hidden="true" />
+              {authMode === 'sign-in' ? 'Entrar' : 'Criar conta'}
+            </button>
+          </form>
+          <button
+            className="auth-switch"
+            onClick={() => setAuthMode((mode) => (mode === 'sign-in' ? 'sign-up' : 'sign-in'))}
+            type="button"
+          >
+            {authMode === 'sign-in' ? 'Criar novo acesso mensal' : 'Ja tenho acesso'}
+          </button>
+          <span className="auth-message">{systemMessage}</span>
+        </section>
+      </main>
+    )
   }
 
   return (
@@ -748,6 +1043,22 @@ function App() {
             </a>
           </div>
         </header>
+
+        <section className="tenant-bar" aria-label="Conta ativa">
+          <div>
+            <strong>{tenant?.name ?? 'Modo local'}</strong>
+            <span>
+              {tenant
+                ? `Plano mensal: ${tenant.subscriptionStatus}`
+                : 'Sem Supabase configurado: dados salvos apenas neste navegador'}
+            </span>
+          </div>
+          {session ? (
+            <button className="ghost-button" onClick={() => void handleSignOut()} type="button">
+              Sair
+            </button>
+          ) : null}
+        </section>
 
         <nav className="top-tabs" aria-label="Guias superiores">
           <a className="active" href="#dashboard">

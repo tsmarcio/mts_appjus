@@ -258,6 +258,70 @@ O app ja possui cliente Supabase em:
 src/lib/supabase.ts
 ```
 
+## Camada SaaS Multiusuario
+
+O sistema foi preparado para uso por multiplos usuarios/clientes no mesmo link web.
+
+Modelo adotado:
+
+- Cada usuario faz login pelo Supabase Auth.
+- Cada usuario pertence a uma empresa/base, chamada `tenant`.
+- Clientes e contratos ficam vinculados a `tenant_id`.
+- Row Level Security separa os dados: um usuario so enxerga a propria base.
+- A tabela `subscriptions` guarda o status da mensalidade por tenant.
+
+Tabelas principais da camada SaaS:
+
+```text
+tenants
+tenant_members
+subscriptions
+clients
+operations
+documents
+compliance_checks
+audit_logs
+```
+
+Status de assinatura previstos:
+
+```text
+trialing
+active
+past_due
+canceled
+```
+
+Importante: a cobranca mensal nao deve ser feita no frontend. Para Stripe, Mercado Pago ou outro provedor, crie checkout e webhooks em Supabase Edge Functions ou backend separado, usando chaves secretas fora do codigo publico.
+
+Para ativar login no site publicado, configure estas variaveis no build:
+
+```text
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_anon_key_publica
+```
+
+Sem essas variaveis, o app continua em modo local/demo e salva dados apenas no navegador.
+
+## GitHub Pages
+
+O projeto esta preparado para GitHub Pages em:
+
+```text
+https://tsmarcio.github.io/mts_appjus/
+```
+
+O workflow `.github/workflows/pages.yml` faz build automatico da `main`.
+
+Para o GitHub Pages usar Supabase online, cadastre os secrets do repositorio:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
+
+Depois, ajuste o workflow para expor esses secrets no passo `Build`.
+
 ## Docker
 
 O frontend tambem pode rodar em container com:
