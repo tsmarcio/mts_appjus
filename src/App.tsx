@@ -26,7 +26,7 @@ import type { Session } from '@supabase/supabase-js'
 
 type ContractStatus = 'active' | 'paused' | 'overdue'
 type ContractDuration = 'indefinite' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12'
-type ContractTab = 'all' | ContractStatus
+type ContractTab = 'all' | 'monthly' | ContractStatus
 type AuthMode = 'sign-in' | 'sign-up'
 
 type Contract = {
@@ -42,6 +42,7 @@ type Contract = {
   date: string
   status: ContractStatus
   duration: ContractDuration
+  interestPercent: number
 }
 
 type Tenant = {
@@ -64,6 +65,7 @@ type OperationRow = {
   id: string
   code: string
   principal_amount: number
+  interest_percentage: number | null
   status: ContractStatus
   duration_months: number | null
   duration_indefinite: boolean | null
@@ -145,6 +147,7 @@ const emptyForm: ContractForm = {
   date: '',
   status: 'active',
   duration: 'indefinite',
+  interestPercent: 30,
 }
 
 const emptyAuthForm: AuthForm = {
@@ -168,6 +171,8 @@ const contractDurationOptions: { label: string; value: ContractDuration }[] = [
     return { label: `${value}x`, value }
   }),
 ]
+
+const interestPercentageOptions = Array.from({ length: 10 }, (_, index) => (index + 1) * 10)
 
 const pixAmount = 'R$ 29,99'
 const pixPhone = '21964976686'
@@ -218,6 +223,7 @@ function loadContracts() {
       date: contract.date ?? '',
       status: contract.status ?? 'active',
       duration: contract.duration ?? 'indefinite',
+      interestPercent: Number(contract.interestPercent ?? 30),
     }))
   } catch {
     return []
@@ -247,6 +253,24 @@ function formatCurrencyAmount(value: number) {
     style: 'currency',
     currency: 'BRL',
   })
+}
+
+function getReceivableAmount(contract: Contract) {
+  const principal = parseCurrencyValue(contract.value)
+  return principal * (1 + Number(contract.interestPercent || 0) / 100)
+}
+
+function getCurrentMonthKey() {
+  const today = new Date()
+  today.setMinutes(today.getMinutes() - today.getTimezoneOffset())
+  return today.toISOString().slice(0, 7)
+}
+
+function getCurrentMonthLabel() {
+  return new Intl.DateTimeFormat('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date())
 }
 
 function onlyDigits(value: string) {
@@ -549,7 +573,7 @@ function App() {
 
       const { data, error } = await supabase
         .from('operations')
-        .select('id, code, principal_amount, status, duration_months, duration_indefinite, due_date, requested_by, client_id, clients(full_name, document_number, email, phone)')
+        .select('id, code, principal_amount, interest_percentage, status, duration_months, duration_indefinite, due_date, requested_by, client_id, clients(full_name, document_number, email, phone)')
         .eq('tenant_id', tenant.id)
         .order('created_at', { ascending: false })
 
@@ -575,6 +599,7 @@ function App() {
           }),
           date: operation.due_date,
           status: operation.status,
+          interestPercent: Number(operation.interest_percentage ?? 30),
           duration: operation.duration_indefinite
             ? 'indefinite'
             : String(operation.duration_months ?? 1) as ContractDuration,
@@ -595,8 +620,13 @@ function App() {
 
   const filteredContracts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
+    const currentMonthKey = getCurrentMonthKey()
     const contractsByTab =
-      contractTab === 'all' ? contracts : contracts.filter((contract) => contract.status === contractTab)
+      contractTab === 'all'
+        ? contracts
+        : contractTab === 'monthly'
+          ? contracts.filter((contract) => contract.date.slice(0, 7) === currentMonthKey)
+          : contracts.filter((contract) => contract.status === contractTab)
 
     if (!normalizedQuery) {
       return contractsByTab
@@ -611,6 +641,8 @@ function App() {
         contract.requestedBy,
         contract.value,
         contract.date,
+        `${contract.interestPercent}%`,
+        formatCurrencyAmount(getReceivableAmount(contract)),
         contractStatusLabels[contract.status],
         formatDuration(contract.duration),
       ]
@@ -623,9 +655,10 @@ function App() {
   const totalPages = Math.max(1, Math.ceil(filteredContracts.length / contractsPerPage))
   const pagedContracts = filteredContracts.slice((currentPage - 1) * contractsPerPage, currentPage * contractsPerPage)
   const filteredContractsTotal = useMemo(
-    () => filteredContracts.reduce((total, contract) => total + parseCurrencyValue(contract.value), 0),
+    () => filteredContracts.reduce((total, contract) => total + getReceivableAmount(contract), 0),
     [filteredContracts],
   )
+  const currentMonthLabel = useMemo(getCurrentMonthLabel, [])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -800,6 +833,8 @@ function App() {
             ? formatDocument(value)
             : field === 'phone'
               ? formatPhone(value)
+              : field === 'interestPercent'
+                ? Number(value)
               : value,
     }))
     setFormErrors((current) => ({ ...current, [field]: undefined }))
@@ -840,7 +875,7 @@ function App() {
   }
 
   function validateAndMarkField(field: keyof ContractForm) {
-    const error = validateField(field, form[field] ?? '')
+    const error = validateField(field, String(form[field] ?? ''))
     setFormErrors((current) => ({ ...current, [field]: error || undefined }))
     return !error
   }
@@ -855,7 +890,7 @@ function App() {
     const nextErrors: FormErrors = {}
 
     for (const field of requiredFields) {
-      const error = validateField(field, nextContract[field] ?? '')
+      const error = validateField(field, String(nextContract[field] ?? ''))
       if (error) {
         nextErrors[field] = error
       }
@@ -1014,6 +1049,7 @@ function App() {
       requestedBy: form.requestedBy.trim(),
       value: form.value.trim(),
       date: form.date,
+      interestPercent: Number(form.interestPercent || 30),
     }
 
     const nextErrors = validateForm(nextContract)
@@ -1060,6 +1096,7 @@ function App() {
           risk: nextContract.status === 'overdue' ? 'high' : 'low',
           guarantee_type: 'Contrato',
           requested_by: nextContract.requestedBy,
+          interest_percentage: nextContract.interestPercent,
           duration_indefinite: nextContract.duration === 'indefinite',
           duration_months: nextContract.duration === 'indefinite' ? null : Number(nextContract.duration),
           due_date: nextContract.date,
@@ -1478,6 +1515,7 @@ function App() {
               <div className="contract-tabs" aria-label="Filtrar contratos por status">
                 {[
                   { label: 'Todos', value: 'all' as ContractTab },
+                  { label: 'Mensal', value: 'monthly' as ContractTab },
                   { label: 'Ativos', value: 'active' as ContractTab },
                   { label: 'Pausados', value: 'paused' as ContractTab },
                   { label: 'Inadimplentes', value: 'overdue' as ContractTab },
@@ -1485,7 +1523,9 @@ function App() {
                   const count =
                     tab.value === 'all'
                       ? contracts.length
-                      : contracts.filter((contract) => contract.status === tab.value).length
+                      : tab.value === 'monthly'
+                        ? contracts.filter((contract) => contract.date.slice(0, 7) === getCurrentMonthKey()).length
+                        : contracts.filter((contract) => contract.status === tab.value).length
                   return (
                     <button
                       className={contractTab === tab.value ? 'active' : undefined}
@@ -1502,6 +1542,8 @@ function App() {
               <div className="contract-header">
                 <span>Nome</span>
                 <span>Valor</span>
+                <span>%</span>
+                <span>A receber 30d</span>
                 <span>Data</span>
                 <span>Tempo</span>
                 <span>Status</span>
@@ -1522,6 +1564,8 @@ function App() {
                         </small>
                       </div>
                       <strong>{contract.value}</strong>
+                      <span>{contract.interestPercent}%</span>
+                      <strong>{formatCurrencyAmount(getReceivableAmount(contract))}</strong>
                       <time dateTime={contract.date}>{formatDate(contract.date)}</time>
                       <span>{formatDuration(contract.duration)}</span>
                       <span className={`status-badge status-${contract.status}`}>
@@ -1568,7 +1612,11 @@ function App() {
                 </div>
               )}
               <div className="contracts-total">
-                <span>Total dos contratos nesta aba</span>
+                <span>
+                  {contractTab === 'monthly'
+                    ? `Total a receber no mes vigente (${currentMonthLabel})`
+                    : 'Total a receber nesta aba'}
+                </span>
                 <strong>{formatCurrencyAmount(filteredContractsTotal)}</strong>
               </div>
               {filteredContracts.length > 0 ? (
@@ -1709,6 +1757,22 @@ function App() {
                     value={form.value}
                   />
                   {formErrors.value ? <small className="field-error">{formErrors.value}</small> : null}
+                </label>
+                <label>
+                  Porcentagem a receber
+                  <select
+                    onChange={(event) => updateForm('interestPercent', event.target.value)}
+                    value={form.interestPercent}
+                  >
+                    {interestPercentageOptions.map((percentage) => (
+                      <option key={percentage} value={percentage}>
+                        {percentage}%
+                      </option>
+                    ))}
+                  </select>
+                  <small>
+                    Exemplo: R$ 100,00 com 30% vira R$ 130,00 a receber em 30 dias.
+                  </small>
                 </label>
                 <label>
                   Data
