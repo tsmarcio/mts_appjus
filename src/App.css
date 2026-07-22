@@ -883,23 +883,99 @@ select.field-invalid,
 }
 
 .site-footer {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto minmax(240px, 1fr);
   align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-height: 72px;
+  gap: 22px;
+  min-height: 104px;
   border-top: 1px solid var(--line);
-  color: var(--ink-500);
-  font-size: 14px;
+  padding: 22px 8px;
+  background: rgba(0, 0, 0, 0.34);
+  color: #e9edf0;
+  font-size: 13px;
 }
 
-.site-footer a {
+.footer-brandline,
+.footer-payment {
+  display: grid;
+  gap: 6px;
+}
+
+.footer-brandline {
+  justify-items: start;
+}
+
+.footer-brandline strong {
+  color: #fff7df;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.footer-brandline span,
+.footer-payment span {
+  color: var(--brand-500);
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.footer-socials {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.footer-socials a {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
-  color: var(--brand-500);
+  border: 1px solid rgba(216, 185, 107, 0.45);
+  border-radius: 999px;
+  background: #fff7df;
+  color: #071018;
   text-decoration: none;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.footer-socials a:hover {
+  background: var(--brand-500);
+  color: #071018;
+}
+
+.footer-payment {
+  justify-items: end;
+}
+
+.footer-payment div {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.footer-payment i {
+  min-width: 44px;
+  border-radius: 3px;
+  padding: 4px 6px;
+  background: #f8fafc;
+  color: #071018;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 950;
+  text-align: center;
+}
+
+.footer-payment i:last-child {
+  background: rgba(216, 185, 107, 0.92);
 }
 
 .intake-form {
@@ -1165,8 +1241,19 @@ select.field-invalid,
 
   .site-footer {
     align-items: center;
-    flex-direction: column;
-    gap: 4px;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 18px 10px;
+    text-align: center;
+  }
+
+  .footer-brandline,
+  .footer-payment {
+    justify-items: center;
+  }
+
+  .footer-payment div {
+    justify-content: center;
   }
 
   .brand,

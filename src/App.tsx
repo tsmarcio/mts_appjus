@@ -1760,16 +1760,32 @@ function App() {
         </section>
 
         <footer className="site-footer">
-          <span>Feito por: mtsinforj</span>
-          <a href="https://www.instagram.com/mtsinforj" rel="noreferrer" target="_blank">
-            <AtSign size={15} aria-hidden="true" />
-            {instagramHandle}
-          </a>
-          <a href={whatsappLink} rel="noreferrer" target="_blank">
-            <Phone size={15} aria-hidden="true" />
-            {contactPhone}
-          </a>
-          <a href="mailto:mts.ic@hotmail.com">mts.ic@hotmail.com</a>
+          <div className="footer-brandline">
+            <strong>Feito por - empresa mtsinforj 2/2026.</strong>
+            <span>RJ-BRASIL</span>
+          </div>
+          <div className="footer-socials" aria-label="Links de contato">
+            <a href={whatsappLink} rel="noreferrer" target="_blank" aria-label="WhatsApp mtsinforj">
+              <Phone size={16} aria-hidden="true" />
+            </a>
+            <a href="https://www.instagram.com/mtsinforj" rel="noreferrer" target="_blank" aria-label="Instagram mtsinforj">
+              <AtSign size={16} aria-hidden="true" />
+              <span>{instagramHandle}</span>
+            </a>
+            <a href="mailto:mts.ic@hotmail.com" aria-label="E-mail mtsinforj">
+              <Mail size={16} aria-hidden="true" />
+            </a>
+          </div>
+          <div className="footer-payment" aria-label="Bandeiras de cartoes aceitas">
+            <span>Cartoes aceitos</span>
+            <div>
+              <i>VISA</i>
+              <i>MASTER</i>
+              <i>ELO</i>
+              <i>AMEX</i>
+              <i>PIX</i>
+            </div>
+          </div>
         </footer>
       </section>
     </main>
