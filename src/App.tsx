@@ -1681,7 +1681,7 @@ function App() {
                             target="_blank"
                             aria-label={`Enviar lembrete por WhatsApp para ${contract.clientName}`}
                           >
-                            <MessageCircle size={16} aria-hidden="true" />
+                            <MessageCircle size={14} aria-hidden="true" />
                           </a>
                         ) : (
                           <button
@@ -1691,7 +1691,7 @@ function App() {
                             type="button"
                             aria-label={`Sem telefone valido para ${contract.clientName}`}
                           >
-                            <MessageCircle size={16} aria-hidden="true" />
+                            <MessageCircle size={14} aria-hidden="true" />
                           </button>
                         )}
                         <button
@@ -1701,7 +1701,7 @@ function App() {
                           type="button"
                           aria-label={`Alterar status de ${contract.clientName} para ${contractStatusLabels[getNextContractStatus(contract.status)]}`}
                         >
-                          <CircleDollarSign size={15} aria-hidden="true" />
+                          <CircleDollarSign size={13} aria-hidden="true" />
                           <span>{getStatusActionLabel(contract.status)}</span>
                         </button>
                         <button
@@ -1710,7 +1710,7 @@ function App() {
                           type="button"
                           aria-label={`Remover contrato de ${contract.clientName}`}
                         >
-                          <Trash2 size={16} aria-hidden="true" />
+                          <Trash2 size={14} aria-hidden="true" />
                         </button>
                       </div>
                     </div>

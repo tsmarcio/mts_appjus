@@ -923,22 +923,22 @@ select.field-invalid,
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 4px;
 }
 
 .status-cycle-button {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0;
   border: 1px solid rgba(216, 185, 107, 0.32);
-  border-radius: 7px;
-  padding: 0 4px;
+  border-radius: 6px;
+  padding: 0;
   background: rgba(216, 185, 107, 0.08);
   color: #fff7df;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 950;
 }
 
@@ -959,14 +959,14 @@ select.field-invalid,
 }
 
 .whatsapp-button {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   color: #83f0a2;
 }
 
 .remove-button {
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   color: var(--danger);
 }
 
@@ -1190,16 +1190,16 @@ select.field-invalid,
   .row-actions {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, 36px);
+    grid-template-columns: repeat(3, 28px);
     justify-content: end;
-    gap: 8px;
+    gap: 6px;
     border-top: 1px solid rgba(216, 185, 107, 0.12);
     padding-top: 8px;
   }
 
   .row-actions .icon-button {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
   }
 }
 
@@ -1544,16 +1544,17 @@ select.field-invalid,
 
   .row-actions {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    justify-content: stretch;
+    grid-template-columns: repeat(3, 28px);
+    justify-content: end;
+    gap: 6px;
     border-top: 1px solid rgba(216, 185, 107, 0.12);
     padding-top: 8px;
   }
 
   .row-actions .icon-button {
-    flex: 1;
-    width: auto;
-    min-height: 34px;
+    width: 28px;
+    height: 28px;
+    min-height: 28px;
   }
 
   .status-cycle-button {
