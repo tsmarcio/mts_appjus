@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
+  Calculator,
   Banknote,
   CalendarClock,
   ChevronRight,
@@ -9,6 +10,7 @@ import {
   LayoutDashboard,
   LockKeyhole,
   Mail,
+  MessageCircle,
   Copy,
   AtSign,
   Phone,
@@ -235,6 +237,18 @@ function formatCurrency(value: string) {
   })
 }
 
+function parseCurrencyValue(value: string) {
+  const digits = value.replace(/\D/g, '')
+  return digits ? Number(digits) / 100 : 0
+}
+
+function formatCurrencyAmount(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  })
+}
+
 function onlyDigits(value: string) {
   return value.replace(/\D/g, '')
 }
@@ -341,6 +355,37 @@ function isValidBrazilPhone(value: string) {
   return digits.length === 10 || digits[2] === '9'
 }
 
+function displayInfo(value: string) {
+  return value.trim() || 'Sem informacao'
+}
+
+function getWhatsAppPhone(value: string) {
+  const digits = onlyDigits(value)
+  if (!isValidBrazilPhone(digits)) {
+    return ''
+  }
+
+  return digits.startsWith('55') ? digits : `55${digits}`
+}
+
+function getDebtReminderUrl(contract: Contract) {
+  const phone = getWhatsAppPhone(contract.phone)
+  if (!phone) {
+    return ''
+  }
+
+  const message = [
+    `Ola, ${contract.clientName}.`,
+    `Lembrete sobre o contrato ${contract.id}.`,
+    `Valor registrado: ${contract.value}.`,
+    `Data/vencimento: ${formatDate(contract.date)}.`,
+    `Status: ${contractStatusLabels[contract.status]}.`,
+    'Por favor, verifique a pendencia e retorne assim que possivel.',
+  ].join('\n')
+
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+}
+
 function formatDate(value: string) {
   if (!value) {
     return '-'
@@ -362,6 +407,8 @@ function App() {
   const [contractTab, setContractTab] = useState<ContractTab>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [pendingAccess, setPendingAccess] = useState<PendingAccessRow[]>([])
+  const [calculatorOpen, setCalculatorOpen] = useState(false)
+  const [calculatorValue, setCalculatorValue] = useState('')
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
   const todayIso = useMemo(getTodayIso, [])
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
@@ -575,6 +622,10 @@ function App() {
 
   const totalPages = Math.max(1, Math.ceil(filteredContracts.length / contractsPerPage))
   const pagedContracts = filteredContracts.slice((currentPage - 1) * contractsPerPage, currentPage * contractsPerPage)
+  const filteredContractsTotal = useMemo(
+    () => filteredContracts.reduce((total, contract) => total + parseCurrencyValue(contract.value), 0),
+    [filteredContracts],
+  )
 
   useEffect(() => {
     setCurrentPage(1)
@@ -765,11 +816,11 @@ function App() {
       return 'Nao validado: informe nome completo ou razao social valida.'
     }
 
-    if (field === 'documentNumber' && !isValidDocument(trimmed)) {
+    if (field === 'documentNumber' && trimmed && !isValidDocument(trimmed)) {
       return 'Nao validado: CPF/CNPJ com digito verificador invalido.'
     }
 
-    if (field === 'phone' && !isValidBrazilPhone(trimmed)) {
+    if (field === 'phone' && trimmed && !isValidBrazilPhone(trimmed)) {
       return 'Nao validado: telefone brasileiro com DDD e numero real.'
     }
 
@@ -798,8 +849,6 @@ function App() {
     const requiredFields: (keyof ContractForm)[] = [
       'requestedBy',
       'clientName',
-      'documentNumber',
-      'phone',
       'value',
       'date',
     ]
@@ -825,6 +874,11 @@ function App() {
 
   async function lookupDocument(documentNumber: string) {
     const documentDigits = onlyDigits(documentNumber)
+    if (!documentDigits) {
+      setFormErrors((current) => ({ ...current, documentNumber: undefined }))
+      return
+    }
+
     if (documentDigits.length !== 11 && documentDigits.length !== 14) {
       return
     }
@@ -888,6 +942,7 @@ function App() {
   async function lookupPhone(phone: string) {
     const phoneDigits = onlyDigits(phone)
     if (!phoneDigits) {
+      setFormErrors((current) => ({ ...current, phone: undefined }))
       return
     }
 
@@ -1047,6 +1102,25 @@ function App() {
     }
 
     persistContracts([], isSupabaseConfigured ? 'Base local e Supabase zerados.' : 'Base local zerada.')
+  }
+
+  function appendCalculatorValue(value: string) {
+    setCalculatorValue((current) => `${current}${value}`)
+  }
+
+  function resolveCalculator() {
+    const expression = calculatorValue.replaceAll(',', '.').replaceAll('×', '*').replaceAll('÷', '/')
+    if (!expression || !/^[\d+\-*/().\s%]+$/.test(expression)) {
+      setCalculatorValue('Erro')
+      return
+    }
+
+    try {
+      const result = Function(`"use strict"; return (${expression})`)() as unknown
+      setCalculatorValue(typeof result === 'number' && Number.isFinite(result) ? String(result).replace('.', ',') : 'Erro')
+    } catch {
+      setCalculatorValue('Erro')
+    }
   }
 
   if (authLoading) {
@@ -1210,6 +1284,14 @@ function App() {
             <Plus size={18} aria-hidden="true" />
             Novo acordo
           </a>
+          <button
+            className={calculatorOpen ? 'active nav-button' : 'nav-button'}
+            onClick={() => setCalculatorOpen((current) => !current)}
+            type="button"
+          >
+            <Calculator size={18} aria-hidden="true" />
+            Calculadora
+          </button>
           {isAppAdmin ? (
             <a href="#liberacao">
               <ShieldCheck size={18} aria-hidden="true" />
@@ -1217,6 +1299,33 @@ function App() {
             </a>
           ) : null}
         </nav>
+
+        {calculatorOpen ? (
+          <section className="quick-calculator" aria-label="Calculadora rapida">
+            <input
+              aria-label="Visor da calculadora"
+              onChange={(event) => setCalculatorValue(event.target.value)}
+              placeholder="0"
+              value={calculatorValue}
+            />
+            <div>
+              {['7', '8', '9', '÷', '4', '5', '6', '×', '1', '2', '3', '-', '0', ',', '.', '+'].map((key) => (
+                <button key={key} onClick={() => appendCalculatorValue(key)} type="button">
+                  {key}
+                </button>
+              ))}
+              <button onClick={() => setCalculatorValue('')} type="button">
+                C
+              </button>
+              <button onClick={() => appendCalculatorValue('/100')} type="button">
+                %
+              </button>
+              <button className="equals" onClick={resolveCalculator} type="button">
+                =
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <section className="security-panel" aria-label="Resumo de seguranca">
           <LockKeyhole size={18} aria-hidden="true" />
@@ -1396,40 +1505,72 @@ function App() {
                 <span>Data</span>
                 <span>Tempo</span>
                 <span>Status</span>
-                <span></span>
+                <span>Acoes</span>
               </div>
               {pagedContracts.length > 0 ? (
-                pagedContracts.map((contract) => (
-                  <div className="contract-row" key={contract.id}>
-                    <div>
-                      <strong>{contract.clientName}</strong>
-                      <span>
-                        {contract.id}
-                        {contract.email ? ` - ${getEmailDomain(contract.email)}` : ''}
+                pagedContracts.map((contract) => {
+                  const reminderUrl = getDebtReminderUrl(contract)
+                  return (
+                    <div className="contract-row" key={contract.id}>
+                      <div>
+                        <strong>{contract.clientName}</strong>
+                        <span>
+                          {contract.id} - CPF/CNPJ: {displayInfo(contract.documentNumber)}
+                        </span>
+                        <small>
+                          Tel: {displayInfo(contract.phone)} | E-mail: {displayInfo(contract.email)}
+                        </small>
+                      </div>
+                      <strong>{contract.value}</strong>
+                      <time dateTime={contract.date}>{formatDate(contract.date)}</time>
+                      <span>{formatDuration(contract.duration)}</span>
+                      <span className={`status-badge status-${contract.status}`}>
+                        {contractStatusLabels[contract.status]}
                       </span>
+                      <div className="row-actions">
+                        {reminderUrl ? (
+                          <a
+                            className="icon-button whatsapp-button"
+                            href={reminderUrl}
+                            rel="noreferrer"
+                            target="_blank"
+                            aria-label={`Enviar lembrete por WhatsApp para ${contract.clientName}`}
+                          >
+                            <MessageCircle size={16} aria-hidden="true" />
+                          </a>
+                        ) : (
+                          <button
+                            className="icon-button whatsapp-button"
+                            disabled
+                            title="Sem telefone valido para WhatsApp"
+                            type="button"
+                            aria-label={`Sem telefone valido para ${contract.clientName}`}
+                          >
+                            <MessageCircle size={16} aria-hidden="true" />
+                          </button>
+                        )}
+                        <button
+                          className="icon-button remove-button"
+                          onClick={() => removeContract(contract)}
+                          type="button"
+                          aria-label={`Remover contrato de ${contract.clientName}`}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      </div>
                     </div>
-                    <strong>{contract.value}</strong>
-                    <time dateTime={contract.date}>{formatDate(contract.date)}</time>
-                    <span>{formatDuration(contract.duration)}</span>
-                    <span className={`status-badge status-${contract.status}`}>
-                      {contractStatusLabels[contract.status]}
-                    </span>
-                    <button
-                      className="icon-button remove-button"
-                      onClick={() => removeContract(contract)}
-                      type="button"
-                      aria-label={`Remover contrato de ${contract.clientName}`}
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  </div>
-                ))
+                  )
+                })
               ) : (
                 <div className="empty-state">
                   <strong>Nenhum contrato cadastrado</strong>
                   <span>Use a guia Cadastro para juristas para inserir o primeiro contrato.</span>
                 </div>
               )}
+              <div className="contracts-total">
+                <span>Total dos contratos nesta aba</span>
+                <strong>{formatCurrencyAmount(filteredContractsTotal)}</strong>
+              </div>
               {filteredContracts.length > 0 ? (
                 <div className="pagination-bar">
                   <span>
@@ -1507,11 +1648,13 @@ function App() {
                     inputMode="numeric"
                     onBlur={(event) => void lookupDocument(event.target.value)}
                     onChange={(event) => updateForm('documentNumber', event.target.value)}
-                    placeholder="Documento do cliente"
-                    required
+                    placeholder="Sem informacao"
                     value={form.documentNumber}
                   />
                   {formErrors.documentNumber ? <small className="field-error">{formErrors.documentNumber}</small> : null}
+                  {!formErrors.documentNumber ? (
+                    <small>Preferencialmente informe CPF/CNPJ correto. Se nao tiver, deixe em branco.</small>
+                  ) : null}
                 </label>
                 <label>
                   Telefone
@@ -1521,11 +1664,13 @@ function App() {
                     inputMode="tel"
                     onBlur={(event) => void lookupPhone(event.target.value)}
                     onChange={(event) => updateForm('phone', event.target.value)}
-                    placeholder="(00) 00000-0000"
-                    required
+                    placeholder="Sem informacao"
                     value={form.phone}
                   />
                   {formErrors.phone ? <small className="field-error">{formErrors.phone}</small> : null}
+                  {!formErrors.phone ? (
+                    <small>Preferencialmente informe telefone real com DDD para lembretes no WhatsApp.</small>
+                  ) : null}
                 </label>
                 <label>
                   E-mail
@@ -1535,7 +1680,7 @@ function App() {
                       aria-invalid={Boolean(formErrors.email)}
                       onBlur={() => validateAndMarkField('email')}
                       onChange={(event) => updateForm('email', event.target.value)}
-                      placeholder="cliente@email.com"
+                      placeholder="Sem informacao"
                       type="email"
                       value={form.email}
                     />
@@ -1544,7 +1689,9 @@ function App() {
                     <small className="field-error">{formErrors.email}</small>
                   ) : form.email ? (
                     <small>Dominio vinculado: {getEmailDomain(form.email) || 'informe o dominio'}</small>
-                  ) : null}
+                  ) : (
+                    <small>Preferencialmente informe um e-mail valido. Se nao tiver, deixe em branco.</small>
+                  )}
                 </label>
               </fieldset>
 

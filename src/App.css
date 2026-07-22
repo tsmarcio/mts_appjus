@@ -226,21 +226,76 @@
   gap: 8px;
 }
 
-.nav-list a {
+.nav-list a,
+.nav-list button {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  border: 0;
   color: #cbd5dc;
   text-decoration: none;
   padding: 11px 12px;
   border-radius: 7px;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
   font-weight: 650;
+  text-align: left;
 }
 
 .nav-list a:hover,
+.nav-list button:hover,
+.nav-list button.active,
 .nav-list .active {
   background: rgba(216, 185, 107, 0.12);
   color: #fff7df;
+}
+
+.quick-calculator {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: rgba(216, 185, 107, 0.07);
+}
+
+.quick-calculator input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 10px;
+  background: rgba(7, 16, 24, 0.86);
+  color: #ffffff;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 850;
+  text-align: right;
+}
+
+.quick-calculator div {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.quick-calculator button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff7df;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 850;
+}
+
+.quick-calculator button:hover,
+.quick-calculator .equals {
+  background: rgba(216, 185, 107, 0.2);
+  color: #ffffff;
 }
 
 .security-panel {
@@ -659,7 +714,7 @@ select.field-invalid,
 .contract-header,
 .contract-row {
   display: grid;
-  grid-template-columns: minmax(170px, 1.3fr) minmax(92px, 0.75fr) minmax(96px, 0.75fr) minmax(120px, 0.9fr) minmax(104px, 0.75fr) 38px;
+  grid-template-columns: minmax(190px, 1.45fr) minmax(92px, 0.72fr) minmax(96px, 0.72fr) minmax(120px, 0.82fr) minmax(104px, 0.72fr) minmax(82px, 0.52fr);
   gap: 10px;
   align-items: center;
   min-width: 0;
@@ -697,10 +752,15 @@ select.field-invalid,
 }
 
 .contract-row span,
+.contract-row small,
 .contract-row time {
   color: var(--ink-500);
   font-size: 14px;
   overflow-wrap: anywhere;
+}
+
+.contract-row small {
+  font-size: 12px;
 }
 
 .status-badge {
@@ -740,6 +800,46 @@ select.field-invalid,
   color: var(--ink-500);
   font-size: 13px;
   font-weight: 800;
+}
+
+.contracts-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(216, 185, 107, 0.34);
+  border-radius: 8px;
+  padding: 13px 16px;
+  background: rgba(216, 185, 107, 0.1);
+}
+
+.contracts-total span {
+  color: var(--ink-500);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.contracts-total strong {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.whatsapp-button {
+  width: 36px;
+  height: 36px;
+  color: #83f0a2;
+}
+
+.whatsapp-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .pagination-bar div {
@@ -963,8 +1063,10 @@ select.field-invalid,
     padding-bottom: 2px;
   }
 
-  .nav-list a {
+  .nav-list a,
+  .nav-list button {
     flex: 0 0 auto;
+    width: auto;
     min-height: 38px;
     padding: 9px 10px;
     font-size: 13px;
@@ -1083,6 +1185,20 @@ select.field-invalid,
 
   .contract-row {
     gap: 8px;
+  }
+
+  .row-actions {
+    justify-content: stretch;
+  }
+
+  .row-actions .icon-button {
+    flex: 1;
+    width: auto;
+  }
+
+  .contracts-total {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .admin-row {
