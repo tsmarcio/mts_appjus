@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && wrangler deploy",
+    "payments:pix": "node scripts/generate-pix-qrcode.mjs",
     "supabase:start": "supabase start",
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
@@ -27,6 +28,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "oxlint": "^1.71.0",
+    "qrcode": "^1.5.4",
     "supabase": "^2.109.1",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"

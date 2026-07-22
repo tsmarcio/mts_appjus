@@ -6,9 +6,10 @@ https://mtsappjus.mtsappjus.workers.dev
 1. Compra e liberacao
 - Acesse o link oficial.
 - Pague o Pix unico de R$ 29,99.
-- Chave Pix telefone: 21964976686
+- Chave Pix telefone: +5521964976686
 - Envie o comprovante pelo WhatsApp: 21964976686
 - Aguarde a liberacao manual do login.
+- Se o aplicativo do banco nao ler o QR Code, toque em Copiar Pix ou use a chave telefone +5521964976686.
 
 2. Criar acesso
 - Clique em Comprar e criar acesso.

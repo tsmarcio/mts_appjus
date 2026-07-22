@@ -176,6 +176,7 @@ const interestPercentageOptions = [0, ...Array.from({ length: 10 }, (_, index) =
 
 const pixAmount = 'R$ 29,99'
 const pixPhone = '21964976686'
+const pixDisplayPhone = `+55${pixPhone}`
 const pixQrPath = `${import.meta.env.BASE_URL}payments/pix-mtsappjus.svg`
 const pixCopyPath = `${import.meta.env.BASE_URL}payments/pix-copia-e-cola.txt`
 const trainingPath = `${import.meta.env.BASE_URL}docs/treinamento-usuario-whatsapp.txt`
@@ -1251,9 +1252,10 @@ function App() {
             <div>
               <span className="eyebrow">Compra do sistema</span>
               <strong>{pixAmount} uma vez so</strong>
-              <p>Pix telefone: {pixPhone}. Envie o comprovante pelo WhatsApp para liberacao.</p>
+              <p>Pix telefone: {pixDisplayPhone}. Envie o comprovante pelo WhatsApp para liberacao.</p>
             </div>
             <img src={pixQrPath} alt="QR Code Pix MTS AppJus" />
+            <small className="pix-fallback">Se o QR nao abrir no banco, toque em Copiar Pix ou use a chave telefone {pixDisplayPhone}.</small>
             <div className="payment-actions">
               <button className="ghost-button" onClick={() => void copyPixPayload()} type="button">
                 <Copy size={16} aria-hidden="true" />
@@ -1338,6 +1340,7 @@ function App() {
               <p>Envie o comprovante pelo WhatsApp e aguarde a liberacao do login.</p>
             </div>
             <img src={pixQrPath} alt="QR Code Pix MTS AppJus" />
+            <small className="pix-fallback">Se o QR nao abrir no banco, toque em Copiar Pix ou use a chave telefone {pixDisplayPhone}.</small>
             <div className="payment-actions">
               <button className="ghost-button" onClick={() => void copyPixPayload()} type="button">
                 <Copy size={16} aria-hidden="true" />

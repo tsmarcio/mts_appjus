@@ -40,9 +40,12 @@
 
 .auth-card img {
   width: 100%;
-  max-height: 180px;
+  height: clamp(120px, 19vw, 170px);
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
+  background:
+    linear-gradient(90deg, #081016 0%, #101820 48%, #081016 100%);
+  padding: 4px;
 }
 
 .auth-card p {
@@ -114,12 +117,18 @@
 }
 
 .payment-box img {
-  width: 148px;
-  height: 148px;
+  width: 156px;
+  height: 156px;
   border-radius: 8px;
   background: #ffffff;
   object-fit: contain;
-  padding: 8px;
+  padding: 10px;
+}
+
+.pix-fallback {
+  color: #d8b96b;
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .payment-actions {
@@ -1436,7 +1445,7 @@ select.field-invalid,
   }
 
   .auth-card img {
-    max-height: 92px;
+    height: 118px;
     object-fit: contain;
   }
 

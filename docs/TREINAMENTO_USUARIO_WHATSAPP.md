@@ -14,7 +14,7 @@ https://mtsappjus.mtsappjus.workers.dev
 4. Chave Pix telefone:
 
 ```text
-21964976686
++5521964976686
 ```
 
 5. Envie o comprovante pelo WhatsApp:
@@ -24,6 +24,8 @@ https://mtsappjus.mtsappjus.workers.dev
 ```
 
 6. Aguarde a liberacao manual do login.
+
+Se o aplicativo do banco nao ler o QR Code, toque em `Copiar Pix` ou use a chave telefone `+5521964976686`.
 
 ## 2. Criar acesso
 

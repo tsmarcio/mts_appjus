@@ -51,7 +51,7 @@ E-mail: mts.ic@hotmail.com
 3. Chave Pix telefone:
 
 ```text
-21964976686
++5521964976686
 ```
 
 4. O usuario envia o comprovante pelo WhatsApp.
@@ -79,6 +79,14 @@ Pix copia-e-cola:
 ```text
 public/payments/pix-copia-e-cola.txt
 ```
+
+Regenerar QR Code e copia-e-cola Pix:
+
+```powershell
+npm run payments:pix
+```
+
+O QR Code usa BR Code Pix com telefone em formato internacional e CRC calculado.
 
 Treinamento para enviar por WhatsApp:
 
