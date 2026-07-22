@@ -344,6 +344,14 @@ VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 ```
 
+No Cloudflare Workers, tambem cadastre essas variaveis em:
+
+```text
+Workers & Pages > mtsappjus > Settings > Variables
+```
+
+O Worker aceita `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` ou `SUPABASE_URL` / `SUPABASE_ANON_KEY`.
+
 ## Docker
 
 O frontend tambem pode rodar em container com:

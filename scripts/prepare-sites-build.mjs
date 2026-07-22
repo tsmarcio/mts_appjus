@@ -84,7 +84,15 @@ export default {
       })
     }
 
-    return new Response(html, {
+    const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || ''
+    const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || ''
+    const runtimeConfigScript = '<script>window.__MTS_APPJUS_CONFIG__=' + JSON.stringify({
+      supabaseUrl,
+      supabaseAnonKey,
+    }) + '</script>'
+    const responseHtml = html.replace('</head>', runtimeConfigScript + '</head>')
+
+    return new Response(responseHtml, {
       headers: {
         'content-type': 'text/html; charset=utf-8',
         'cache-control': 'no-store',

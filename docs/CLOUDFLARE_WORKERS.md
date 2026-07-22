@@ -69,6 +69,30 @@ VITE_SUPABASE_ANON_KEY
 
 O token precisa ter permissao para Cloudflare Workers.
 
+## Banco Supabase no Cloudflare
+
+Para o site publicado sair de `Modo local`, configure as variaveis tambem no painel Cloudflare:
+
+```text
+Workers & Pages > mtsappjus > Settings > Variables
+```
+
+Adicione:
+
+```text
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_anon_key_publica
+```
+
+O Worker tambem aceita estes nomes, caso prefira:
+
+```text
+SUPABASE_URL=https://seu-projeto.supabase.co
+SUPABASE_ANON_KEY=sua_anon_key_publica
+```
+
+Depois salve e faca um novo deploy. O app injeta essas variaveis em tempo de execucao e o frontend passa a abrir a tela de login conectada ao Supabase.
+
 ## Deploy por Workers
 
 Depois que o projeto estiver conectado no Cloudflare:
