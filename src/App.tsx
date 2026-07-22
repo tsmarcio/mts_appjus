@@ -451,7 +451,6 @@ function App() {
   const [calculatorValue, setCalculatorValue] = useState('')
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
-  const brandSystemBannerPath = `${import.meta.env.BASE_URL}brand/mts-appjus-system-banner.png`
   const isAppAdmin = session?.user.email?.toLowerCase() === contactEmail
 
   const loadPendingAccess = useCallback(async () => {
@@ -1453,7 +1452,7 @@ function App() {
 
       <section className="workspace">
         <section className="brand-hero" aria-label="Identidade MTS AppJus">
-          <img src={brandSystemBannerPath} alt="MTS AppJus - Gestao Discreta e Segura de Acordos Privados" />
+          <img src={brandLogoPath} alt="MTS AppJus - Gestao Discreta e Segura de Acordos Privados" />
         </section>
 
         <header className="topbar" id="dashboard">
