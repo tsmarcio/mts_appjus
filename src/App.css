@@ -589,6 +589,7 @@ select.field-invalid,
 .contracts-panel {
   min-height: 320px;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 .admin-panel {
@@ -926,18 +927,18 @@ select.field-invalid,
 }
 
 .status-cycle-button {
-  width: 52px;
+  width: 32px;
   height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 0;
   border: 1px solid rgba(216, 185, 107, 0.32);
   border-radius: 7px;
   padding: 0 4px;
   background: rgba(216, 185, 107, 0.08);
   color: #fff7df;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 950;
 }
 
@@ -963,6 +964,12 @@ select.field-invalid,
   color: #83f0a2;
 }
 
+.remove-button {
+  width: 32px;
+  height: 32px;
+  color: var(--danger);
+}
+
 .whatsapp-button:disabled {
   cursor: not-allowed;
   opacity: 0.4;
@@ -980,12 +987,6 @@ select.field-invalid,
 .ghost-button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
-}
-
-.remove-button {
-  width: 32px;
-  height: 32px;
-  color: var(--danger);
 }
 
 .empty-state {
@@ -1149,6 +1150,57 @@ select.field-invalid,
   color: var(--ink-500);
   font-size: 12px;
   font-weight: 700;
+}
+
+@container (max-width: 920px) {
+  .contract-header {
+    display: none;
+  }
+
+  .contract-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .contract-row > *:not(:first-child):not(.row-actions) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid rgba(216, 185, 107, 0.12);
+    padding-top: 8px;
+  }
+
+  .contract-row > *[data-label]::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: var(--ink-500);
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .contract-row .status-badge {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .row-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 36px);
+    justify-content: end;
+    gap: 8px;
+    border-top: 1px solid rgba(216, 185, 107, 0.12);
+    padding-top: 8px;
+  }
+
+  .row-actions .icon-button {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 .email-field {

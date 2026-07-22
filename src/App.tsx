@@ -266,9 +266,9 @@ function getNextContractStatus(status: ContractStatus): ContractStatus {
 
 function getStatusActionLabel(status: ContractStatus) {
   return {
-    active: 'Paus',
-    paused: 'Inad',
-    overdue: 'Atv',
+    active: 'P',
+    paused: 'I',
+    overdue: 'A',
   }[status]
 }
 
