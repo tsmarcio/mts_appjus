@@ -55,5 +55,3 @@ const svg = await QRCode.toString(payload, {
 
 await writeFile('public/payments/pix-copia-e-cola.txt', `${payload}\n`)
 await writeFile('public/payments/pix-mtsappjus.svg', svg)
-
-console.log(payload)
