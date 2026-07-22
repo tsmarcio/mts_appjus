@@ -925,34 +925,36 @@ select.field-invalid,
   gap: 6px;
 }
 
-.status-select-button {
-  width: 78px;
+.status-cycle-button {
+  width: 52px;
   height: 32px;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  justify-content: center;
+  gap: 2px;
   border: 1px solid rgba(216, 185, 107, 0.32);
   border-radius: 7px;
-  padding: 0 5px;
+  padding: 0 4px;
   background: rgba(216, 185, 107, 0.08);
   color: #fff7df;
+  font-size: 9px;
+  font-weight: 950;
 }
 
-.status-select-button select {
-  min-width: 0;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  font-size: 10px;
-  font-weight: 900;
+.status-cycle-button span {
+  line-height: 1;
 }
 
-.status-select-button option {
-  background: #101c25;
-  color: #ffffff;
+.status-cycle-active {
+  color: #dbe4ea;
+}
+
+.status-cycle-paused {
+  color: #ffdf8a;
+}
+
+.status-cycle-overdue {
+  color: #83f0a2;
 }
 
 .whatsapp-button {
@@ -1496,15 +1498,14 @@ select.field-invalid,
     padding-top: 8px;
   }
 
-  .row-actions .icon-button,
-  .status-select-button {
+  .row-actions .icon-button {
     flex: 1;
     width: auto;
     min-height: 34px;
   }
 
-  .status-select-button {
-    justify-content: center;
+  .status-cycle-button {
+    min-width: 0;
   }
 
   .date-filter-summary {

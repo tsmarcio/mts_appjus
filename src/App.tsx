@@ -252,6 +252,26 @@ function getReceivableAmount(contract: Contract) {
   return principal * (1 + Number(contract.interestPercent || 0) / 100)
 }
 
+function getNextContractStatus(status: ContractStatus): ContractStatus {
+  if (status === 'active') {
+    return 'paused'
+  }
+
+  if (status === 'paused') {
+    return 'overdue'
+  }
+
+  return 'active'
+}
+
+function getStatusActionLabel(status: ContractStatus) {
+  return {
+    active: 'Paus',
+    paused: 'Inad',
+    overdue: 'Atv',
+  }[status]
+}
+
 function getCurrentMonthKey() {
   const today = new Date()
   today.setMinutes(today.getMinutes() - today.getTimezoneOffset())
@@ -1674,18 +1694,16 @@ function App() {
                             <MessageCircle size={16} aria-hidden="true" />
                           </button>
                         )}
-                        <label className="status-select-button" aria-label={`Alterar status de ${contract.clientName}`}>
+                        <button
+                          className={`icon-button status-cycle-button status-cycle-${contract.status}`}
+                          onClick={() => void updateContractStatus(contract, getNextContractStatus(contract.status))}
+                          title={`Alterar para ${contractStatusLabels[getNextContractStatus(contract.status)]}`}
+                          type="button"
+                          aria-label={`Alterar status de ${contract.clientName} para ${contractStatusLabels[getNextContractStatus(contract.status)]}`}
+                        >
                           <CircleDollarSign size={15} aria-hidden="true" />
-                          <select
-                            onChange={(event) => void updateContractStatus(contract, event.target.value as ContractStatus)}
-                            title="Alterar status"
-                            value={contract.status}
-                          >
-                            <option value="active">Ativo</option>
-                            <option value="paused">Pausado</option>
-                            <option value="overdue">Inadimplente</option>
-                          </select>
-                        </label>
+                          <span>{getStatusActionLabel(contract.status)}</span>
+                        </button>
                         <button
                           className="icon-button remove-button"
                           onClick={() => removeContract(contract)}
