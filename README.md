@@ -20,6 +20,12 @@ https://mtsappjus.mtsappjus.workers.dev
 - Cadastro inicial sem disparo de e-mail do Supabase, para evitar limite do SMTP padrao.
 - Login bloqueado ate liberacao manual do proprietario.
 - Painel do proprietario para liberar acessos Pix.
+- Cadastro de contratos sem campo extra duplicado: o nome do cliente pode receber apelido junto ao nome.
+- Porcentagem a receber por contrato, de 10% a 100%.
+- Valor total a receber em 30 dias calculado automaticamente.
+- Abas de contratos por status: todos, ativos, pausados, inadimplentes e mensal.
+- Lembrete de divida via WhatsApp quando houver telefone cadastrado.
+- Calculadora rapida na barra lateral.
 - Deploy em Cloudflare Workers.
 - Codigo versionado na branch `main` do GitHub.
 
@@ -185,8 +191,27 @@ Regras importantes:
 - `clients` e `operations` usam `tenant_id`.
 - O proprietario cadastrado em `private.app_admins` consegue listar e liberar assinaturas.
 - A chave `service_role` ou secret key nunca deve ir para o frontend.
+- O banco mantem somente os campos atuais de contrato. A coluna antiga `requested_by` e removida pela migration `20260722043709_remove_requested_by_column.sql`.
 - O cadastro usa a RPC `public.register_app_user` para criar o usuario confirmado e a assinatura `pending_payment` sem chamar `/auth/v1/signup`.
 - Essa RPC evita o erro `email rate limit exceeded` do SMTP padrao do Supabase.
+
+## Dados De Teste
+
+O arquivo `supabase/seed.sql` cria 10 contratos de exemplo para o usuario master:
+
+```text
+mts.ic@hotmail.com
+```
+
+Os exemplos usam codigos `MTS-TEST-001` ate `MTS-TEST-010`, com clientes, documentos, telefones, e-mails, valores, status, datas, prazos e porcentagens preenchidos.
+
+Para aplicar no banco remoto pelo CLI, primeiro linke o projeto Supabase e depois rode:
+
+```powershell
+npx supabase db query --linked --file supabase/seed.sql
+```
+
+Quando terminar os testes, a base pode ser limpa removendo os codigos `MTS-TEST-001` ate `MTS-TEST-010`.
 
 ## Limite De E-mail Do Supabase
 

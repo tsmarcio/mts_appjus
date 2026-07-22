@@ -66,7 +66,6 @@ create table public.operations (
   status public.operation_status not null default 'draft',
   risk public.risk_level not null default 'medium',
   guarantee_type text,
-  requested_by text,
   duration_months integer check (duration_months between 1 and 12),
   duration_indefinite boolean not null default true,
   due_date date,

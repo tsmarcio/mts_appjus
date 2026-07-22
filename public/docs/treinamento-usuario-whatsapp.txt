@@ -21,12 +21,17 @@ https://mtsappjus.mtsappjus.workers.dev
 - Clique em Novo acordo.
 - Preencha nome do cliente. Se quiser, use um apelido junto ao nome.
 - Preencha CPF/CNPJ, telefone e e-mail quando tiver essas informacoes.
-- Preencha valor, data, tempo do contrato e status.
+- Preencha valor, data, porcentagem a receber, tempo do contrato e status.
 - Clique em Salvar contrato.
 
 4. Consultar contratos
 - Use as abas Todos, Ativos, Pausados e Inadimplentes.
 - Use a busca para localizar por nome, documento, e-mail ou telefone.
+- Cada linha mostra o valor original e o total a receber em 30 dias conforme a porcentagem escolhida.
+- Quando houver telefone cadastrado, use o botao de WhatsApp para abrir um lembrete da divida.
+
+5. Calculadora
+- Use o botao Calculadora na barra lateral para abrir calculos rapidos sem sair do sistema.
 
 Suporte:
 Feito por: mtsinforj
