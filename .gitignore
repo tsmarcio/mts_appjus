@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 mts-appjus-sites-build-*.tar.gz
+.agents/
+skills-lock.json
 
 # Editor directories and files
 .vscode/*
