@@ -1563,15 +1563,15 @@ function App() {
                           Tel: {displayInfo(contract.phone)} | E-mail: {displayInfo(contract.email)}
                         </small>
                       </div>
-                      <strong>{contract.value}</strong>
-                      <span>{contract.interestPercent}%</span>
-                      <strong>{formatCurrencyAmount(getReceivableAmount(contract))}</strong>
-                      <time dateTime={contract.date}>{formatDate(contract.date)}</time>
-                      <span>{formatDuration(contract.duration)}</span>
-                      <span className={`status-badge status-${contract.status}`}>
+                      <strong data-label="Valor">{contract.value}</strong>
+                      <span data-label="Porcentagem">{contract.interestPercent}%</span>
+                      <strong data-label="A receber 30d">{formatCurrencyAmount(getReceivableAmount(contract))}</strong>
+                      <time data-label="Data" dateTime={contract.date}>{formatDate(contract.date)}</time>
+                      <span data-label="Tempo">{formatDuration(contract.duration)}</span>
+                      <span data-label="Status" className={`status-badge status-${contract.status}`}>
                         {contractStatusLabels[contract.status]}
                       </span>
-                      <div className="row-actions">
+                      <div className="row-actions" data-label="Acoes">
                         {reminderUrl ? (
                           <a
                             className="icon-button whatsapp-button"
