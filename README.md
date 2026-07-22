@@ -353,6 +353,12 @@ Workers & Pages > mtsappjus > Settings > Variables
 
 O Worker aceita `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` ou `SUPABASE_URL` / `SUPABASE_ANON_KEY`.
 
+Guia direto:
+
+```text
+docs/SUPABASE_CLOUDFLARE_SETUP.md
+```
+
 ## Docker
 
 O frontend tambem pode rodar em container com:

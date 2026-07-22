@@ -16,7 +16,7 @@ import {
   UserRoundCheck,
 } from 'lucide-react'
 import './App.css'
-import { isSupabaseConfigured, supabase } from './lib/supabase'
+import { isSupabaseConfigured, supabase, supabaseConfig } from './lib/supabase'
 import type { Session } from '@supabase/supabase-js'
 
 type ContractStatus = 'active' | 'paused' | 'overdue'
@@ -1046,11 +1046,13 @@ function App() {
 
         <section className="tenant-bar" aria-label="Conta ativa">
           <div>
-            <strong>{tenant?.name ?? 'Modo local'}</strong>
+            <strong>{tenant?.name ?? (isSupabaseConfigured ? 'Supabase conectado' : 'Banco Supabase pendente')}</strong>
             <span>
               {tenant
                 ? `Plano mensal: ${tenant.subscriptionStatus}`
-                : 'Sem Supabase configurado: dados salvos apenas neste navegador'}
+                : isSupabaseConfigured
+                  ? 'Login online habilitado. Entre para usar sua base na nuvem.'
+                  : `Configure no Cloudflare: ${supabaseConfig.missing.join(' + ')}`}
             </span>
           </div>
           {session ? (
