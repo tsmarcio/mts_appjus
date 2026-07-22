@@ -209,7 +209,7 @@ Regras importantes:
 
 ## Dados De Teste
 
-O arquivo `supabase/seed.sql` cria 10 contratos de exemplo para o usuario master:
+O arquivo `supabase/seed.sql` cria 50 contratos de exemplo para o usuario master:
 
 ```text
 mts.ic@hotmail.com
@@ -223,7 +223,7 @@ Para aplicar no banco remoto pelo CLI, primeiro linke o projeto Supabase e depoi
 npx supabase db query --linked --file supabase/seed.sql
 ```
 
-Quando terminar os testes, a base pode ser limpa removendo os codigos `MTS-TEST-001` ate `MTS-TEST-010`.
+Quando terminar os testes, a base pode ser limpa por dentro do sistema pelo botao `Limpar base`, na guia `Contratos`. O seed usa os codigos `MTS-TEST-001` ate `MTS-TEST-050` e pode ser rodado novamente sem duplicar esses exemplos.
 
 ## Limite De E-mail Do Supabase
 
