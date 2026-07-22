@@ -16,6 +16,7 @@ import {
   AtSign,
   Phone,
   Plus,
+  Printer,
   Search,
   ShieldCheck,
   Trash2,
@@ -447,6 +448,8 @@ function App() {
   const [pendingAccess, setPendingAccess] = useState<PendingAccessRow[]>([])
   const [calculatorOpen, setCalculatorOpen] = useState(false)
   const [calculatorValue, setCalculatorValue] = useState('')
+  const [reportTitle, setReportTitle] = useState('Relatorio de contratos')
+  const [reportNotes, setReportNotes] = useState('Relatorio gerado conforme os filtros atuais da guia Contratos.')
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
   const isAppAdmin = session?.user.email?.toLowerCase() === contactEmail
@@ -1193,6 +1196,11 @@ function App() {
     persistContracts([], isSupabaseConfigured ? 'Base local e Supabase zerados.' : 'Base local zerada.')
   }
 
+  function printReport() {
+    setSystemMessage('Relatorio pronto para impressao.')
+    window.setTimeout(() => window.print(), 100)
+  }
+
   function appendCalculatorValue(value: string) {
     setCalculatorValue((current) => `${current}${value}`)
   }
@@ -1373,6 +1381,10 @@ function App() {
             <Plus size={18} aria-hidden="true" />
             Novo acordo
           </a>
+          <a href="#relatorio">
+            <Printer size={18} aria-hidden="true" />
+            Relatorio
+          </a>
           <button
             className={calculatorOpen ? 'active nav-button' : 'nav-button'}
             onClick={() => setCalculatorOpen((current) => !current)}
@@ -1489,6 +1501,7 @@ function App() {
           </a>
           <a href="#contratos">Contratos</a>
           <a href="#cadastro">Novo acordo</a>
+          <a href="#relatorio">Relatorio</a>
           {isAppAdmin ? <a href="#liberacao">Liberar acessos</a> : null}
         </nav>
 
@@ -1914,6 +1927,72 @@ function App() {
               </button>
             </form>
           </article>
+        </section>
+
+        <section className="panel report-panel print-area" id="relatorio">
+          <div className="panel-heading">
+            <div>
+              <span className="eyebrow">Relatorio para impressao</span>
+              <h2>Relatorio editavel</h2>
+            </div>
+            <button className="primary-button" onClick={printReport} type="button">
+              <Printer size={16} aria-hidden="true" />
+              Imprimir
+            </button>
+          </div>
+
+          <div className="report-layout">
+            <div className="report-controls">
+              <label>
+                Titulo do relatorio
+                <input
+                  onChange={(event) => setReportTitle(event.target.value)}
+                  value={reportTitle}
+                />
+              </label>
+              <label>
+                Observacoes editaveis
+                <textarea
+                  onChange={(event) => setReportNotes(event.target.value)}
+                  rows={4}
+                  value={reportNotes}
+                />
+              </label>
+              <div className="report-hint">
+                <strong>{filteredContracts.length} contratos no filtro atual</strong>
+                <span>{formatCurrencyAmount(filteredContractsTotal)} a receber em 30 dias.</span>
+              </div>
+            </div>
+
+            <article className="report-preview" aria-label="Previa do relatorio">
+              <header>
+                <strong>{reportTitle || 'Relatorio de contratos'}</strong>
+                <span>{new Intl.DateTimeFormat('pt-BR').format(new Date())}</span>
+              </header>
+              <p>{reportNotes}</p>
+              <div className="report-summary">
+                <span>Quantidade: {filteredContracts.length}</span>
+                <span>Valor original: {formatCurrencyAmount(filteredContractsPrincipalTotal)}</span>
+                <span>Total a receber: {formatCurrencyAmount(filteredContractsTotal)}</span>
+              </div>
+              <div className="report-table">
+                <div>
+                  <strong>Cliente</strong>
+                  <strong>Valor</strong>
+                  <strong>Status</strong>
+                  <strong>Data</strong>
+                </div>
+                {filteredContracts.map((contract) => (
+                  <div key={contract.id}>
+                    <span>{contract.clientName}</span>
+                    <span>{formatCurrencyAmount(getReceivableAmount(contract))}</span>
+                    <span>{contractStatusLabels[contract.status]}</span>
+                    <span>{formatDate(contract.date)}</span>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
         </section>
 
         <footer className="site-footer">

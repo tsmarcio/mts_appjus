@@ -140,6 +140,7 @@
   min-height: 100vh;
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
+  align-items: stretch;
   overflow-x: hidden;
   background:
     radial-gradient(circle at top right, rgba(216, 185, 107, 0.13), transparent 32rem),
@@ -148,9 +149,11 @@
 }
 
 .sidebar {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+  position: relative;
+  top: auto;
+  align-self: stretch;
+  min-height: 100vh;
+  height: auto;
   padding: 12px 10px;
   background: rgba(6, 12, 18, 0.92);
   border-right: 1px solid var(--line);
@@ -398,7 +401,8 @@ h2 {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -572,7 +576,7 @@ select.field-invalid,
 
 .content-grid.clean {
   grid-template-columns: minmax(0, 1fr) minmax(286px, 318px);
-  align-items: start;
+  align-items: stretch;
 }
 
 .panel {
@@ -590,6 +594,12 @@ select.field-invalid,
   min-height: 260px;
   overflow: hidden;
   container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+}
+
+.contracts-panel .contract-list {
+  flex: 1;
 }
 
 .admin-panel {
@@ -1221,6 +1231,116 @@ select.field-invalid,
   padding: 0;
 }
 
+.report-panel {
+  scroll-margin-top: 12px;
+}
+
+.report-layout {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.45fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.report-controls {
+  display: grid;
+  gap: 8px;
+}
+
+.report-controls label {
+  display: grid;
+  gap: 5px;
+  color: var(--ink-700);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.report-controls input,
+.report-controls textarea {
+  min-height: 31px;
+  box-sizing: border-box;
+  padding: 7px 8px;
+  color: var(--ink-700);
+  font: inherit;
+  font-size: 11px;
+  resize: vertical;
+}
+
+.report-hint,
+.report-preview {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-soft);
+}
+
+.report-hint {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+}
+
+.report-hint strong {
+  color: #ffffff;
+  font-size: 12px;
+}
+
+.report-hint span {
+  color: var(--ink-500);
+  font-size: 11px;
+}
+
+.report-preview {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.report-preview header,
+.report-summary,
+.report-table > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.report-preview header strong {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.report-preview header span,
+.report-preview p,
+.report-summary span,
+.report-table span {
+  color: var(--ink-500);
+  font-size: 11px;
+}
+
+.report-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid rgba(216, 185, 107, 0.18);
+  border-radius: 7px;
+  padding: 7px;
+  background: rgba(216, 185, 107, 0.06);
+}
+
+.report-table {
+  display: grid;
+  gap: 4px;
+}
+
+.report-table > div {
+  grid-template-columns: minmax(120px, 1fr) 90px 82px 72px;
+  border-bottom: 1px solid rgba(216, 185, 107, 0.12);
+  padding-bottom: 4px;
+}
+
+.report-table strong {
+  color: var(--brand-500);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
 .full {
   width: 100%;
   margin-top: 4px;
@@ -1261,6 +1381,63 @@ select.field-invalid,
 
   .date-filter-summary {
     justify-content: flex-start;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .app-shell {
+    display: block;
+    min-height: auto;
+    background: #ffffff;
+    color: #111111;
+  }
+
+  .sidebar,
+  .brand-hero,
+  .topbar,
+  .tenant-bar,
+  .top-tabs,
+  .metric-grid,
+  .system-message,
+  .content-grid,
+  .site-footer,
+  .report-controls,
+  .report-panel .panel-heading button {
+    display: none !important;
+  }
+
+  .workspace {
+    display: block;
+    padding: 0;
+  }
+
+  .report-panel,
+  .report-preview {
+    border: 0;
+    box-shadow: none;
+    background: #ffffff;
+    color: #111111;
+  }
+
+  .report-panel {
+    padding: 0;
+  }
+
+  .report-layout {
+    display: block;
+  }
+
+  .report-preview header strong,
+  .report-table strong,
+  .report-preview header span,
+  .report-preview p,
+  .report-summary span,
+  .report-table span {
+    color: #111111;
   }
 }
 
@@ -1563,6 +1740,13 @@ select.field-invalid,
 
   .date-filter-summary {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .report-layout,
+  .report-summary,
+  .report-table > div,
+  .report-preview header {
     grid-template-columns: 1fr;
   }
 

@@ -68,7 +68,11 @@ Quando nao quiser cobrar acrescimo, selecione `Sem porcentagem` no cadastro do c
 
 Use o botao `Calculadora` na barra lateral para abrir calculos rapidos sem sair do sistema.
 
-## 6. Suporte
+## 6. Relatorio
+
+Use a guia `Relatorio` para editar titulo, observacoes e imprimir os contratos conforme os filtros atuais.
+
+## 7. Suporte
 
 Feito por: mtsinforj
 
