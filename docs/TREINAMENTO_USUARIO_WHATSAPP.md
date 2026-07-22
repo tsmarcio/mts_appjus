@@ -70,7 +70,7 @@ Use o botao `Calculadora` na barra lateral para abrir calculos rapidos sem sair 
 
 ## 6. Relatorio
 
-Use o botao `Relatorio` para imprimir o mes vigente com todos os contratos marcados como `Ativo` e o total.
+Use o botao `Relatorio` para imprimir o mes vigente com contratos `Ativo`, principal, rendimento e total por linha.
 
 ## 7. Suporte
 

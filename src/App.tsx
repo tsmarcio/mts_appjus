@@ -1955,17 +1955,27 @@ function App() {
               <div>
                 <strong>Cliente</strong>
                 <strong>Contrato</strong>
+                <strong>Principal</strong>
+                <strong>%</strong>
+                <strong>Rendimento</strong>
                 <strong>Data</strong>
                 <strong>Total</strong>
               </div>
-              {monthlyActiveReportContracts.map((contract) => (
-                <div key={contract.id}>
-                  <span>{contract.clientName}</span>
-                  <span>{contract.id}</span>
-                  <span>{formatDate(contract.date)}</span>
-                  <span>{formatCurrencyAmount(getReceivableAmount(contract))}</span>
-                </div>
-              ))}
+              {monthlyActiveReportContracts.map((contract) => {
+                const principal = parseCurrencyValue(contract.value)
+                const receivable = getReceivableAmount(contract)
+                return (
+                  <div key={contract.id}>
+                    <span>{contract.clientName}</span>
+                    <span>{contract.id}</span>
+                    <span>{formatCurrencyAmount(principal)}</span>
+                    <span>{contract.interestPercent === 0 ? 'Sem %' : `${contract.interestPercent}%`}</span>
+                    <span>{formatCurrencyAmount(receivable - principal)}</span>
+                    <span>{formatDate(contract.date)}</span>
+                    <span>{formatCurrencyAmount(receivable)}</span>
+                  </div>
+                )
+              })}
             </div>
           </article>
         </section>

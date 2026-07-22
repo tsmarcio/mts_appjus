@@ -29,7 +29,7 @@ https://mtsappjus.mtsappjus.workers.dev
 - Opcao sem porcentagem para contratos sem acrescimo em 30 dias.
 - Lembrete de divida via WhatsApp quando houver telefone cadastrado.
 - Calculadora rapida na barra lateral.
-- Botao `Relatorio` para imprimir somente o mes vigente, com contratos ativos e total.
+- Botao `Relatorio` para imprimir somente o mes vigente, com contratos ativos, principal, rendimento e total por linha.
 - Deploy em Cloudflare Workers.
 - Codigo versionado na branch `main` do GitHub.
 
