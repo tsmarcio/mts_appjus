@@ -196,12 +196,6 @@ function formatDuration(value: ContractDuration) {
   return value === 'indefinite' ? 'Tempo indeterminado' : `${value}x`
 }
 
-function getTodayIso() {
-  const today = new Date()
-  today.setMinutes(today.getMinutes() - today.getTimezoneOffset())
-  return today.toISOString().slice(0, 10)
-}
-
 function loadContracts() {
   const stored = window.localStorage.getItem(storageKey)
   if (!stored) {
@@ -434,7 +428,6 @@ function App() {
   const [calculatorOpen, setCalculatorOpen] = useState(false)
   const [calculatorValue, setCalculatorValue] = useState('')
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
-  const todayIso = useMemo(getTodayIso, [])
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
   const isAppAdmin = session?.user.email?.toLowerCase() === contactEmail
 
@@ -867,8 +860,8 @@ function App() {
       return 'Nao validado: informe valor maior que zero.'
     }
 
-    if (field === 'date' && (Number.isNaN(new Date(`${trimmed}T00:00:00`).getTime()) || trimmed < todayIso)) {
-      return 'Nao validado: informe uma data real a partir de hoje.'
+    if (field === 'date' && Number.isNaN(new Date(`${trimmed}T00:00:00`).getTime())) {
+      return 'Nao validado: informe uma data real.'
     }
 
     return ''
@@ -1779,7 +1772,6 @@ function App() {
                   <input
                     aria-invalid={Boolean(formErrors.date)}
                     className={formErrors.date ? 'field-invalid' : undefined}
-                    min={todayIso}
                     onBlur={() => validateAndMarkField('date')}
                     onChange={(event) => updateForm('date', event.target.value)}
                     required
