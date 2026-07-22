@@ -319,7 +319,6 @@
 }
 
 .brand-hero {
-  position: relative;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -328,7 +327,7 @@
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
   height: clamp(138px, 15vw, 190px);
   min-height: 0;
-  padding: 8px;
+  padding: 3px;
 }
 
 .brand-hero img {
