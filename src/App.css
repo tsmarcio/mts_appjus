@@ -139,7 +139,7 @@
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr);
   overflow-x: hidden;
   background:
     radial-gradient(circle at top right, rgba(216, 185, 107, 0.13), transparent 32rem),
@@ -151,13 +151,13 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  padding: 24px 18px;
+  padding: 16px 12px;
   background: rgba(6, 12, 18, 0.92);
   border-right: 1px solid var(--line);
   color: #f8fafc;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 16px;
 }
 
 .brand,
@@ -169,9 +169,9 @@
 }
 
 .brand {
-  gap: 12px;
+  gap: 10px;
   align-items: center;
-  min-height: 76px;
+  min-height: 60px;
 }
 
 .brand-logo-frame,
@@ -183,9 +183,9 @@
 }
 
 .brand-logo-frame {
-  width: 86px;
-  height: 86px;
-  flex: 0 0 86px;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid rgba(216, 185, 107, 0.34);
@@ -194,8 +194,8 @@
 }
 
 .brand-logo {
-  width: 236px;
-  height: 86px;
+  width: 160px;
+  height: 58px;
   object-fit: cover;
   object-position: 10% center;
 }
@@ -211,7 +211,7 @@
 
 .brand strong {
   color: var(--brand-500);
-  font-size: 19px;
+  font-size: 17px;
   line-height: 1.1;
 }
 
@@ -235,7 +235,7 @@
   border: 0;
   color: #cbd5dc;
   text-decoration: none;
-  padding: 11px 12px;
+  padding: 9px 10px;
   border-radius: 7px;
   background: transparent;
   cursor: pointer;
@@ -254,10 +254,10 @@
 
 .quick-calculator {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 12px;
+  padding: 10px;
   background: rgba(216, 185, 107, 0.07);
 }
 
@@ -309,9 +309,9 @@
 }
 
 .workspace {
-  padding: 28px;
+  padding: 18px;
   display: grid;
-  gap: 22px;
+  gap: 14px;
   min-width: 0;
 }
 
@@ -321,7 +321,7 @@
   border-radius: 8px;
   background: #081016;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
-  height: clamp(150px, 17vw, 250px);
+  height: clamp(118px, 13vw, 180px);
   min-height: 0;
   padding: 5px;
 }
@@ -337,7 +337,7 @@
 .topbar {
   display: grid;
   grid-template-columns: minmax(300px, 1fr) auto;
-  gap: 24px;
+  gap: 16px;
   align-items: start;
 }
 
@@ -357,18 +357,18 @@ p {
 
 h1 {
   max-width: 920px;
-  margin-top: 6px;
+  margin-top: 4px;
   color: #f8fafc;
-  font-size: 32px;
+  font-size: 28px;
   line-height: 1.12;
   font-weight: 760;
 }
 
 .title-support {
   max-width: 620px;
-  margin-top: 8px;
+  margin-top: 5px;
   color: var(--ink-500);
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
@@ -385,8 +385,8 @@ h2 {
 }
 
 .search-box {
-  height: 42px;
-  min-width: 300px;
+  height: 38px;
+  min-width: 260px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -442,8 +442,8 @@ select.field-invalid,
 }
 
 .icon-button {
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
   background: var(--surface);
   color: var(--ink-700);
@@ -452,13 +452,13 @@ select.field-invalid,
 
 .primary-button,
 .ghost-button {
-  min-height: 42px;
+  min-height: 38px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border-radius: 8px;
-  padding: 0 14px;
+  padding: 0 12px;
   font-weight: 800;
   text-decoration: none;
 }
@@ -478,7 +478,7 @@ select.field-invalid,
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
 .metric-grid.compact {
@@ -494,17 +494,17 @@ select.field-invalid,
 }
 
 .metric-card {
-  min-height: 132px;
-  padding: 18px;
+  min-height: 104px;
+  padding: 14px;
 }
 
 .metric-icon {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   background: var(--brand-100);
   color: #7a5c24;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .metric-card span {
@@ -513,24 +513,24 @@ select.field-invalid,
 }
 
 .metric-card strong {
-  margin-top: 5px;
+  margin-top: 3px;
   color: #ffffff;
-  font-size: 25px;
+  font-size: 22px;
 }
 
 .metric-card small {
-  margin-top: 8px;
+  margin-top: 5px;
   color: var(--brand-700);
   font-weight: 800;
 }
 
 .system-message {
-  min-height: 42px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   background: rgba(216, 185, 107, 0.08);
   color: var(--brand-100);
   font-size: 14px;
@@ -538,14 +538,14 @@ select.field-invalid,
 }
 
 .tenant-bar {
-  min-height: 58px;
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   background: rgba(216, 185, 107, 0.07);
 }
 
@@ -567,27 +567,27 @@ select.field-invalid,
 .content-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.8fr);
-  gap: 16px;
+  gap: 12px;
 }
 
 .content-grid.clean {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 380px);
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 350px);
   align-items: start;
 }
 
 .panel {
   min-width: 0;
-  padding: 20px;
+  padding: 14px;
 }
 
 .panel-heading {
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
 }
 
 .contracts-panel {
-  min-height: 390px;
+  min-height: 320px;
   overflow: hidden;
 }
 
@@ -638,20 +638,20 @@ select.field-invalid,
   gap: 8px;
   overflow-x: auto;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 10px;
+  padding-bottom: 7px;
 }
 
 .top-tabs a {
-  min-height: 38px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0 13px;
+  padding: 0 11px;
   color: var(--ink-700);
   background: var(--surface);
   text-decoration: none;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -665,7 +665,7 @@ select.field-invalid,
 
 .contract-list {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -673,24 +673,24 @@ select.field-invalid,
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 5px;
+  margin-bottom: 4px;
 }
 
 .contract-tabs button {
-  min-height: 32px;
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 0 10px;
+  padding: 0 9px;
   background: var(--surface-soft);
   color: var(--ink-700);
   cursor: pointer;
   font: inherit;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 850;
 }
 
@@ -715,22 +715,22 @@ select.field-invalid,
 .contract-row {
   display: grid;
   grid-template-columns: minmax(180px, 1.35fr) minmax(88px, 0.62fr) 52px minmax(118px, 0.82fr) minmax(92px, 0.62fr) minmax(96px, 0.68fr) minmax(100px, 0.68fr) minmax(82px, 0.5fr);
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   min-width: 0;
 }
 
 .contract-header {
-  padding: 0 14px 6px;
+  padding: 0 10px 4px;
   color: var(--ink-500);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
 }
 
 .contract-row {
-  min-height: 70px;
-  padding: 12px 16px;
+  min-height: 58px;
+  padding: 9px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
@@ -755,20 +755,20 @@ select.field-invalid,
 .contract-row small,
 .contract-row time {
   color: var(--ink-500);
-  font-size: 14px;
+  font-size: 12px;
   overflow-wrap: anywhere;
 }
 
 .contract-row small {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .status-badge {
   width: fit-content;
   max-width: 100%;
   border-radius: 999px;
-  padding: 5px 9px;
-  font-size: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
 }
@@ -789,14 +789,14 @@ select.field-invalid,
 }
 
 .pagination-bar {
-  min-height: 46px;
+  min-height: 38px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   border-top: 1px solid var(--line);
-  margin-top: 6px;
-  padding-top: 12px;
+  margin-top: 4px;
+  padding-top: 8px;
   color: var(--ink-500);
   font-size: 13px;
   font-weight: 800;
@@ -809,7 +809,7 @@ select.field-invalid,
   gap: 12px;
   border: 1px solid rgba(216, 185, 107, 0.34);
   border-radius: 8px;
-  padding: 13px 16px;
+  padding: 10px 12px;
   background: rgba(216, 185, 107, 0.1);
 }
 
@@ -821,7 +821,7 @@ select.field-invalid,
 
 .contracts-total strong {
   color: #ffffff;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .row-actions {
@@ -832,8 +832,8 @@ select.field-invalid,
 }
 
 .whatsapp-button {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   color: #83f0a2;
 }
 
@@ -848,7 +848,7 @@ select.field-invalid,
 }
 
 .pagination-bar .ghost-button {
-  min-height: 36px;
+  min-height: 32px;
 }
 
 .ghost-button:disabled {
@@ -857,13 +857,13 @@ select.field-invalid,
 }
 
 .remove-button {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   color: var(--danger);
 }
 
 .empty-state {
-  min-height: 150px;
+  min-height: 110px;
   display: grid;
   place-content: center;
   gap: 6px;
@@ -887,9 +887,9 @@ select.field-invalid,
   grid-template-columns: minmax(240px, 1fr) auto minmax(240px, 1fr);
   align-items: center;
   gap: 22px;
-  min-height: 104px;
+  min-height: 82px;
   border-top: 1px solid var(--line);
-  padding: 22px 8px;
+  padding: 16px 8px;
   background: rgba(0, 0, 0, 0.34);
   color: #e9edf0;
   font-size: 13px;
@@ -980,15 +980,15 @@ select.field-invalid,
 
 .intake-form {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .intake-form fieldset {
   display: grid;
-  gap: 12px;
+  gap: 9px;
   min-width: 0;
   margin: 0;
-  padding: 14px;
+  padding: 11px;
   border: 1px solid var(--line);
   border-radius: 8px;
 }
@@ -1010,9 +1010,9 @@ select.field-invalid,
 
 .intake-form input,
 .intake-form select {
-  min-height: 42px;
+  min-height: 36px;
   box-sizing: border-box;
-  padding: 0 12px;
+  padding: 0 10px;
   color: var(--ink-700);
   font-weight: 500;
 }
@@ -1024,14 +1024,14 @@ select.field-invalid,
 }
 
 .email-field {
-  min-height: 42px;
+  min-height: 36px;
   display: flex;
   align-items: center;
   gap: 8px;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: var(--surface);
-  padding: 0 12px;
+  padding: 0 10px;
   color: var(--brand-500);
 }
 
