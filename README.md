@@ -333,6 +333,7 @@ VITE_SUPABASE_ANON_KEY
 Para dominio proprio ou rotas customizadas:
 
 ```text
+docs/CLOUDFLARE_WORKERS.md
 docs/CUSTOM_DOMAIN.md
 ```
 

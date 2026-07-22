@@ -1,4 +1,4 @@
-# Cloudflare Workers / Pages
+# Cloudflare Workers
 
 ## Link desejado por Workers
 
@@ -67,7 +67,7 @@ VITE_SUPABASE_URL
 VITE_SUPABASE_ANON_KEY
 ```
 
-O token precisa ter permissao para Cloudflare Workers ou Pages, conforme a forma escolhida.
+O token precisa ter permissao para Cloudflare Workers.
 
 ## Deploy por Workers
 
