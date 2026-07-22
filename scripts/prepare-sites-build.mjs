@@ -61,6 +61,10 @@ function base64ToBytes(base64) {
   return bytes
 }
 
+function cleanEnvValue(value) {
+  return String(value || '').replace(/^\\uFEFF/, '').trim()
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url)
@@ -84,8 +88,8 @@ export default {
       })
     }
 
-    const supabaseUrl = env.VITE_SUPABASE_URL || env.SUPABASE_URL || ''
-    const supabaseAnonKey = env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY || ''
+    const supabaseUrl = cleanEnvValue(env.VITE_SUPABASE_URL || env.SUPABASE_URL)
+    const supabaseAnonKey = cleanEnvValue(env.VITE_SUPABASE_ANON_KEY || env.SUPABASE_ANON_KEY)
     const runtimeConfigScript = '<script>window.__MTS_APPJUS_CONFIG__=' + JSON.stringify({
       supabaseUrl,
       supabaseAnonKey,

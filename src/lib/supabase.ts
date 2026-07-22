@@ -12,9 +12,17 @@ declare global {
 }
 
 const runtimeConfig = typeof window === 'undefined' ? undefined : window.__MTS_APPJUS_CONFIG__
-const supabaseUrl = runtimeConfig?.supabaseUrl || (import.meta.env.VITE_SUPABASE_URL as string | undefined)
-const supabaseAnonKey =
-  runtimeConfig?.supabaseAnonKey || (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)
+
+function cleanConfigValue(value: string | undefined) {
+  return value?.replace(/^\uFEFF/, '').trim()
+}
+
+const supabaseUrl = cleanConfigValue(
+  runtimeConfig?.supabaseUrl || (import.meta.env.VITE_SUPABASE_URL as string | undefined),
+)
+const supabaseAnonKey = cleanConfigValue(
+  runtimeConfig?.supabaseAnonKey || (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined),
+)
 
 export const supabaseConfig = {
   hasUrl: Boolean(supabaseUrl),
