@@ -17,6 +17,7 @@ https://mtsappjus.mtsappjus.workers.dev
 - Multiusuario com `tenant_id` e Row Level Security.
 - Compra unica por Pix no valor de R$ 29,99.
 - QR Code Pix e copia-e-cola dentro da tela de login.
+- Cadastro inicial sem disparo de e-mail do Supabase, para evitar limite do SMTP padrao.
 - Login bloqueado ate liberacao manual do proprietario.
 - Painel do proprietario para liberar acessos Pix.
 - Deploy em Cloudflare Workers.
@@ -184,6 +185,20 @@ Regras importantes:
 - `clients` e `operations` usam `tenant_id`.
 - O proprietario cadastrado em `private.app_admins` consegue listar e liberar assinaturas.
 - A chave `service_role` ou secret key nunca deve ir para o frontend.
+- O cadastro usa a RPC `public.register_app_user` para criar o usuario confirmado e a assinatura `pending_payment` sem chamar `/auth/v1/signup`.
+- Essa RPC evita o erro `email rate limit exceeded` do SMTP padrao do Supabase.
+
+## Limite De E-mail Do Supabase
+
+O Supabase Free permite muitos usuarios ativos mensais, mas o SMTP padrao do Auth e limitado para producao. O endpoint de cadastro padrao `/auth/v1/signup` pode bater em `email rate limit exceeded`.
+
+Neste projeto, o cadastro do app foi ajustado para nao enviar e-mail na criacao da conta. O usuario cria a conta, entra com senha e fica bloqueado ate a liberacao Pix.
+
+Para producao completa, configure SMTP proprio no Supabase para recursos como recuperacao de senha, notificacoes e confirmacoes futuras:
+
+```text
+Supabase > Authentication > Emails > SMTP Settings
+```
 
 ## Cloudflare Workers
 

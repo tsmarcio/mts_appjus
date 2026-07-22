@@ -125,6 +125,14 @@ type PendingAccessRow = {
     | null
 }
 
+type RegistrationResult = {
+  ok: boolean
+  code?: string
+  message?: string
+  user_id?: string
+  tenant_id?: string
+}
+
 const emptyForm: ContractForm = {
   clientName: '',
   documentNumber: '',
@@ -659,24 +667,40 @@ function App() {
 
     setAuthLoading(true)
     if (authMode === 'sign-up') {
-      const { data, error } = await supabase.auth.signUp({
-        email: authForm.email.trim(),
-        password: authForm.password,
+      const normalizedEmail = authForm.email.trim().toLowerCase()
+      const { data: registration, error: registrationError } = await supabase.rpc('register_app_user', {
+        p_email: normalizedEmail,
+        p_password: authForm.password,
+        p_organization_name: authForm.organizationName,
       })
 
-      if (error) {
-        setSystemMessage(error.message)
+      if (registrationError) {
+        setSystemMessage('Nao foi possivel criar o acesso agora. Tente novamente ou chame no WhatsApp.')
         setAuthLoading(false)
         return
       }
 
-      if (data.session) {
-        setSession(data.session)
-        await createTenantForUser(data.session, authForm.organizationName)
-        setSystemMessage('Conta criada. Pague o Pix e envie o comprovante para liberar o login.')
-      } else {
-        setSystemMessage('Conta criada. Confirme o e-mail antes de entrar.')
+      const registrationResult = registration as RegistrationResult | null
+      if (!registrationResult?.ok) {
+        setSystemMessage(registrationResult?.message ?? 'Nao foi possivel criar este acesso.')
+        setAuthLoading(false)
+        return
       }
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password: authForm.password,
+      })
+
+      if (error) {
+        setSystemMessage('Conta criada. Entre com seu e-mail e senha para acompanhar a liberacao.')
+        setAuthLoading(false)
+        return
+      }
+
+      setSession(data.session)
+      await loadTenant(data.session)
+      setSystemMessage('Conta criada sem limite de e-mail. Pague o Pix e envie o comprovante para liberar o login.')
     } else {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: authForm.email.trim(),
