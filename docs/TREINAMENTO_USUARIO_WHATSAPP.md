@@ -36,8 +36,8 @@ https://mtsappjus.mtsappjus.workers.dev
 ## 3. Cadastrar contrato
 
 1. Clique em `Novo acordo`.
-2. Informe a referencia da pessoa que pediu o credito.
-3. Preencha nome do cliente, CPF/CNPJ, telefone e e-mail.
+2. Preencha nome do cliente. Se quiser, use um apelido junto ao nome.
+3. Preencha CPF/CNPJ, telefone e e-mail quando tiver essas informacoes.
 4. Preencha valor, data, tempo do contrato e status.
 5. Clique em `Salvar contrato`.
 
@@ -52,7 +52,7 @@ Pausados
 Inadimplentes
 ```
 
-Use a busca para localizar por nome, documento, e-mail, telefone ou referencia.
+Use a busca para localizar por nome, documento, e-mail ou telefone.
 
 ## 5. Suporte
 

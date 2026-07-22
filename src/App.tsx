@@ -37,7 +37,6 @@ type Contract = {
   documentNumber: string
   email: string
   phone: string
-  requestedBy: string
   value: string
   date: string
   status: ContractStatus
@@ -70,7 +69,6 @@ type OperationRow = {
   duration_months: number | null
   duration_indefinite: boolean | null
   due_date: string
-  requested_by: string | null
   client_id: string
   clients:
     | {
@@ -142,7 +140,6 @@ const emptyForm: ContractForm = {
   documentNumber: '',
   email: '',
   phone: '',
-  requestedBy: '',
   value: '',
   date: '',
   status: 'active',
@@ -212,7 +209,6 @@ function loadContracts() {
       documentNumber: contract.documentNumber ?? '',
       email: contract.email ?? '',
       phone: contract.phone ?? '',
-      requestedBy: contract.requestedBy ?? '',
       value: contract.value ?? '',
       date: contract.date ?? '',
       status: contract.status ?? 'active',
@@ -566,7 +562,7 @@ function App() {
 
       const { data, error } = await supabase
         .from('operations')
-        .select('id, code, principal_amount, interest_percentage, status, duration_months, duration_indefinite, due_date, requested_by, client_id, clients(full_name, document_number, email, phone)')
+        .select('id, code, principal_amount, interest_percentage, status, duration_months, duration_indefinite, due_date, client_id, clients(full_name, document_number, email, phone)')
         .eq('tenant_id', tenant.id)
         .order('created_at', { ascending: false })
 
@@ -585,7 +581,6 @@ function App() {
           documentNumber: client?.document_number ?? '',
           email: client?.email ?? '',
           phone: client?.phone ?? '',
-          requestedBy: operation.requested_by ?? '',
           value: Number(operation.principal_amount).toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
@@ -631,7 +626,6 @@ function App() {
         contract.documentNumber,
         contract.email,
         contract.phone,
-        contract.requestedBy,
         contract.value,
         contract.date,
         `${contract.interestPercent}%`,
@@ -836,10 +830,6 @@ function App() {
   function validateField(field: keyof ContractForm, value: string) {
     const trimmed = value.trim()
 
-    if (field === 'requestedBy' && !isValidPersonName(trimmed)) {
-      return 'Nao validado: informe nome e sobrenome reais da referencia.'
-    }
-
     if (field === 'clientName' && !isValidPersonName(trimmed)) {
       return 'Nao validado: informe nome completo ou razao social valida.'
     }
@@ -875,7 +865,6 @@ function App() {
 
   function validateForm(nextContract: Contract) {
     const requiredFields: (keyof ContractForm)[] = [
-      'requestedBy',
       'clientName',
       'value',
       'date',
@@ -1039,7 +1028,6 @@ function App() {
       documentNumber: form.documentNumber.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
-      requestedBy: form.requestedBy.trim(),
       value: form.value.trim(),
       date: form.date,
       interestPercent: Number(form.interestPercent || 30),
@@ -1088,7 +1076,6 @@ function App() {
           status: nextContract.status,
           risk: nextContract.status === 'overdue' ? 'high' : 'low',
           guarantee_type: 'Contrato',
-          requested_by: nextContract.requestedBy,
           interest_percentage: nextContract.interestPercent,
           duration_indefinite: nextContract.duration === 'indefinite',
           duration_months: nextContract.duration === 'indefinite' ? null : Number(nextContract.duration),
@@ -1383,7 +1370,7 @@ function App() {
               <input
                 aria-label="Buscar contratos"
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Buscar contrato, nome, documento ou referencia"
+                placeholder="Buscar contrato, nome, documento"
                 value={query}
               />
             </label>
@@ -1649,23 +1636,6 @@ function App() {
               <UserRoundCheck size={22} aria-hidden="true" />
             </div>
             <form className="intake-form" onSubmit={handleSubmit}>
-              <fieldset>
-                <legend>Referência da pessoa que pediu o crédito</legend>
-                <label>
-                  Nome da referência
-                  <input
-                    aria-invalid={Boolean(formErrors.requestedBy)}
-                    className={formErrors.requestedBy ? 'field-invalid' : undefined}
-                    onBlur={() => validateAndMarkField('requestedBy')}
-                    onChange={(event) => updateForm('requestedBy', event.target.value)}
-                    placeholder="Quem solicitou o crédito"
-                    required
-                    value={form.requestedBy}
-                  />
-                  {formErrors.requestedBy ? <small className="field-error">{formErrors.requestedBy}</small> : null}
-                </label>
-              </fieldset>
-
               <fieldset>
                 <legend>Informações ao cliente</legend>
                 <label>
