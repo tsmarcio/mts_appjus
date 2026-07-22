@@ -24,6 +24,9 @@ https://mtsappjus.mtsappjus.workers.dev
 - Porcentagem a receber por contrato, de 10% a 100%.
 - Valor total a receber em 30 dias calculado automaticamente.
 - Abas de contratos por status: todos, ativos, pausados, inadimplentes e mensal.
+- Filtros de contratos por dia, mes e ano, com resumo de valores filtrados.
+- Alteracao rapida de status direto na linha do contrato.
+- Opcao sem porcentagem para contratos sem acrescimo em 30 dias.
 - Lembrete de divida via WhatsApp quando houver telefone cadastrado.
 - Calculadora rapida na barra lateral.
 - Deploy em Cloudflare Workers.

@@ -5,6 +5,7 @@ import {
   Banknote,
   CalendarClock,
   ChevronRight,
+  CircleDollarSign,
   FileLock2,
   FileText,
   LayoutDashboard,
@@ -27,6 +28,7 @@ import type { Session } from '@supabase/supabase-js'
 type ContractStatus = 'active' | 'paused' | 'overdue'
 type ContractDuration = 'indefinite' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10' | '11' | '12'
 type ContractTab = 'all' | 'monthly' | ContractStatus
+type DateFilterMode = 'all' | 'day' | 'month' | 'year'
 type AuthMode = 'sign-in' | 'sign-up'
 
 type Contract = {
@@ -169,7 +171,7 @@ const contractDurationOptions: { label: string; value: ContractDuration }[] = [
   }),
 ]
 
-const interestPercentageOptions = Array.from({ length: 10 }, (_, index) => (index + 1) * 10)
+const interestPercentageOptions = [0, ...Array.from({ length: 10 }, (_, index) => (index + 1) * 10)]
 
 const pixAmount = 'R$ 29,99'
 const pixPhone = '21964976686'
@@ -419,6 +421,8 @@ function App() {
   const [authLoading, setAuthLoading] = useState(isSupabaseConfigured)
   const [query, setQuery] = useState('')
   const [contractTab, setContractTab] = useState<ContractTab>('all')
+  const [dateFilterMode, setDateFilterMode] = useState<DateFilterMode>('all')
+  const [dateFilterValue, setDateFilterValue] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pendingAccess, setPendingAccess] = useState<PendingAccessRow[]>([])
   const [calculatorOpen, setCalculatorOpen] = useState(false)
@@ -616,11 +620,27 @@ function App() {
           ? contracts.filter((contract) => contract.date.slice(0, 7) === currentMonthKey)
           : contracts.filter((contract) => contract.status === contractTab)
 
+    const contractsByDate = contractsByTab.filter((contract) => {
+      if (dateFilterMode === 'all' || !dateFilterValue) {
+        return true
+      }
+
+      if (dateFilterMode === 'day') {
+        return contract.date === dateFilterValue
+      }
+
+      if (dateFilterMode === 'month') {
+        return contract.date.slice(0, 7) === dateFilterValue
+      }
+
+      return contract.date.slice(0, 4) === dateFilterValue
+    })
+
     if (!normalizedQuery) {
-      return contractsByTab
+      return contractsByDate
     }
 
-    return contractsByTab.filter((contract) =>
+    return contractsByDate.filter((contract) =>
       [
         contract.clientName,
         contract.documentNumber,
@@ -637,7 +657,7 @@ function App() {
         .toLowerCase()
         .includes(normalizedQuery),
     )
-  }, [contractTab, contracts, query])
+  }, [contractTab, contracts, dateFilterMode, dateFilterValue, query])
 
   const totalPages = Math.max(1, Math.ceil(filteredContracts.length / contractsPerPage))
   const pagedContracts = filteredContracts.slice((currentPage - 1) * contractsPerPage, currentPage * contractsPerPage)
@@ -645,11 +665,15 @@ function App() {
     () => filteredContracts.reduce((total, contract) => total + getReceivableAmount(contract), 0),
     [filteredContracts],
   )
+  const filteredContractsPrincipalTotal = useMemo(
+    () => filteredContracts.reduce((total, contract) => total + parseCurrencyValue(contract.value), 0),
+    [filteredContracts],
+  )
   const currentMonthLabel = useMemo(getCurrentMonthLabel, [])
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [contractTab, query])
+  }, [contractTab, dateFilterMode, dateFilterValue, query])
 
   const metrics = useMemo(
     () => [
@@ -1112,6 +1136,34 @@ function App() {
     persistContracts(contracts.filter((item) => item.id !== contract.id), 'Contrato removido.')
   }
 
+  async function updateContractStatus(contract: Contract, nextStatus: ContractStatus) {
+    if (contract.status === nextStatus) {
+      return
+    }
+
+    if (isSupabaseConfigured && supabase && tenant && contract.operationId) {
+      const { error } = await supabase
+        .from('operations')
+        .update({
+          status: nextStatus,
+          risk: nextStatus === 'overdue' ? 'high' : nextStatus === 'paused' ? 'medium' : 'low',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', contract.operationId)
+        .eq('tenant_id', tenant.id)
+
+      if (error) {
+        setSystemMessage('Nao foi possivel alterar o status do contrato.')
+        return
+      }
+    }
+
+    persistContracts(
+      contracts.map((item) => (item.id === contract.id ? { ...item, status: nextStatus } : item)),
+      `Contrato alterado para ${contractStatusLabels[nextStatus]}.`,
+    )
+  }
+
   async function clearContracts() {
     if (isSupabaseConfigured && supabase && tenant) {
       await supabase.from('operations').delete().eq('tenant_id', tenant.id)
@@ -1519,6 +1571,55 @@ function App() {
                   )
                 })}
               </div>
+              <div
+                className={`contract-date-tools ${dateFilterMode === 'all' ? 'without-date-value' : ''}`}
+                aria-label="Filtros por data dos contratos"
+              >
+                <div className="date-mode-tabs" role="group" aria-label="Periodo do filtro">
+                  {[
+                    { label: 'Todos', value: 'all' as DateFilterMode },
+                    { label: 'Dia', value: 'day' as DateFilterMode },
+                    { label: 'Mes', value: 'month' as DateFilterMode },
+                    { label: 'Ano', value: 'year' as DateFilterMode },
+                  ].map((item) => (
+                    <button
+                      className={dateFilterMode === item.value ? 'active' : undefined}
+                      key={item.value}
+                      onClick={() => {
+                        setDateFilterMode(item.value)
+                        setDateFilterValue('')
+                      }}
+                      type="button"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                {dateFilterMode !== 'all' ? (
+                  <label className="date-filter-field">
+                    <span>{dateFilterMode === 'day' ? 'Filtrar dia' : dateFilterMode === 'month' ? 'Filtrar mes' : 'Filtrar ano'}</span>
+                    <input
+                      aria-label="Valor do filtro de data"
+                      inputMode={dateFilterMode === 'year' ? 'numeric' : undefined}
+                      maxLength={dateFilterMode === 'year' ? 4 : undefined}
+                      onChange={(event) =>
+                        setDateFilterValue(
+                          dateFilterMode === 'year'
+                            ? event.target.value.replace(/\D/g, '').slice(0, 4)
+                            : event.target.value,
+                        )}
+                      placeholder={dateFilterMode === 'year' ? '2026' : undefined}
+                      type={dateFilterMode === 'day' ? 'date' : dateFilterMode === 'month' ? 'month' : 'text'}
+                      value={dateFilterValue}
+                    />
+                  </label>
+                ) : null}
+                <div className="date-filter-summary" aria-label="Resumo financeiro do filtro">
+                  <span>{filteredContracts.length} contratos</span>
+                  <strong>{formatCurrencyAmount(filteredContractsPrincipalTotal)}</strong>
+                  <strong>{formatCurrencyAmount(filteredContractsTotal)} a receber</strong>
+                </div>
+              </div>
               <div className="contract-header">
                 <span>Nome</span>
                 <span>Valor</span>
@@ -1544,7 +1645,7 @@ function App() {
                         </small>
                       </div>
                       <strong data-label="Valor">{contract.value}</strong>
-                      <span data-label="Porcentagem">{contract.interestPercent}%</span>
+                      <span data-label="Porcentagem">{contract.interestPercent === 0 ? 'Sem %' : `${contract.interestPercent}%`}</span>
                       <strong data-label="A receber 30d">{formatCurrencyAmount(getReceivableAmount(contract))}</strong>
                       <time data-label="Data" dateTime={contract.date}>{formatDate(contract.date)}</time>
                       <span data-label="Tempo">{formatDuration(contract.duration)}</span>
@@ -1573,6 +1674,18 @@ function App() {
                             <MessageCircle size={16} aria-hidden="true" />
                           </button>
                         )}
+                        <label className="status-select-button" aria-label={`Alterar status de ${contract.clientName}`}>
+                          <CircleDollarSign size={15} aria-hidden="true" />
+                          <select
+                            onChange={(event) => void updateContractStatus(contract, event.target.value as ContractStatus)}
+                            title="Alterar status"
+                            value={contract.status}
+                          >
+                            <option value="active">Ativo</option>
+                            <option value="paused">Pausado</option>
+                            <option value="overdue">Inadimplente</option>
+                          </select>
+                        </label>
                         <button
                           className="icon-button remove-button"
                           onClick={() => removeContract(contract)}
@@ -1729,7 +1842,7 @@ function App() {
                   >
                     {interestPercentageOptions.map((percentage) => (
                       <option key={percentage} value={percentage}>
-                        {percentage}%
+                        {percentage === 0 ? 'Sem porcentagem' : `${percentage}%`}
                       </option>
                     ))}
                   </select>

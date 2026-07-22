@@ -58,6 +58,12 @@ Cada linha mostra o valor original e o total a receber em 30 dias conforme a por
 
 Quando houver telefone cadastrado, use o botao de WhatsApp para abrir um lembrete da divida.
 
+Use o seletor de status na linha do contrato para mudar entre Ativo, Pausado e Inadimplente.
+
+Use os filtros `Dia`, `Mes` e `Ano` para ver contratos de periodos especificos e conferir os totais filtrados.
+
+Quando nao quiser cobrar acrescimo, selecione `Sem porcentagem` no cadastro do contrato.
+
 ## 5. Calculadora
 
 Use o botao `Calculadora` na barra lateral para abrir calculos rapidos sem sair do sistema.

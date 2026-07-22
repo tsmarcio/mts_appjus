@@ -711,10 +711,104 @@ select.field-invalid,
   font-size: 11px;
 }
 
+.contract-date-tools {
+  display: grid;
+  grid-template-columns: auto minmax(150px, 190px) minmax(260px, 1fr);
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(216, 185, 107, 0.22);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(216, 185, 107, 0.06);
+}
+
+.contract-date-tools.without-date-value {
+  grid-template-columns: auto minmax(260px, 1fr);
+}
+
+.date-mode-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.date-mode-tabs button {
+  min-height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: var(--surface-soft);
+  color: var(--ink-700);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.date-mode-tabs button:hover,
+.date-mode-tabs .active {
+  border-color: rgba(216, 185, 107, 0.56);
+  background: rgba(216, 185, 107, 0.14);
+  color: #fff7df;
+}
+
+.date-filter-field {
+  display: grid;
+  gap: 4px;
+}
+
+.date-filter-field span {
+  color: var(--ink-500);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.date-filter-field input {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 0 9px;
+  background: var(--surface);
+  color: #ffffff;
+  font: inherit;
+  font-size: 12px;
+}
+
+.date-filter-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-self: end;
+}
+
+.date-filter-summary span,
+.date-filter-summary strong {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(216, 185, 107, 0.22);
+  border-radius: 999px;
+  padding: 0 10px;
+  background: rgba(7, 16, 24, 0.5);
+  color: var(--ink-700);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.date-filter-summary strong:last-child {
+  color: #fff7df;
+  background: rgba(216, 185, 107, 0.13);
+}
+
 .contract-header,
 .contract-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.35fr) minmax(88px, 0.62fr) 52px minmax(118px, 0.82fr) minmax(92px, 0.62fr) minmax(96px, 0.68fr) minmax(100px, 0.68fr) minmax(82px, 0.5fr);
+  grid-template-columns: minmax(180px, 1.35fr) minmax(88px, 0.62fr) 52px minmax(118px, 0.82fr) minmax(92px, 0.62fr) minmax(96px, 0.68fr) minmax(100px, 0.68fr) minmax(128px, 0.66fr);
   gap: 8px;
   align-items: center;
   min-width: 0;
@@ -831,6 +925,36 @@ select.field-invalid,
   gap: 6px;
 }
 
+.status-select-button {
+  width: 78px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border: 1px solid rgba(216, 185, 107, 0.32);
+  border-radius: 7px;
+  padding: 0 5px;
+  background: rgba(216, 185, 107, 0.08);
+  color: #fff7df;
+}
+
+.status-select-button select {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.status-select-button option {
+  background: #101c25;
+  color: #ffffff;
+}
+
 .whatsapp-button {
   width: 32px;
   height: 32px;
@@ -883,13 +1007,15 @@ select.field-invalid,
 }
 
 .site-footer {
+  width: calc(100% + 36px);
+  margin-inline: -18px;
   display: grid;
   grid-template-columns: minmax(240px, 1fr) auto minmax(240px, 1fr);
   align-items: center;
   gap: 22px;
   min-height: 82px;
   border-top: 1px solid var(--line);
-  padding: 16px 8px;
+  padding: 18px;
   background: rgba(0, 0, 0, 0.34);
   color: #e9edf0;
   font-size: 13px;
@@ -1073,6 +1199,14 @@ select.field-invalid,
   .content-grid,
   .content-grid.clean {
     grid-template-columns: 1fr;
+  }
+
+  .contract-date-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .date-filter-summary {
+    justify-content: flex-start;
   }
 }
 
@@ -1288,6 +1422,8 @@ select.field-invalid,
   }
 
   .site-footer {
+    width: calc(100% + 28px);
+    margin-inline: -14px;
     align-items: center;
     grid-template-columns: 1fr;
     gap: 14px;
@@ -1354,16 +1490,26 @@ select.field-invalid,
 
   .row-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-content: stretch;
     border-top: 1px solid rgba(216, 185, 107, 0.12);
     padding-top: 8px;
   }
 
-  .row-actions .icon-button {
+  .row-actions .icon-button,
+  .status-select-button {
     flex: 1;
     width: auto;
     min-height: 34px;
+  }
+
+  .status-select-button {
+    justify-content: center;
+  }
+
+  .date-filter-summary {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .contracts-total {
