@@ -28,7 +28,7 @@
 }
 
 .auth-card {
-  width: min(620px, 100%);
+  width: min(740px, 100%);
   display: grid;
   gap: 20px;
   border: 1px solid rgba(216, 185, 107, 0.24);
@@ -94,13 +94,21 @@
 
 .payment-box {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 120px;
-  gap: 10px;
+  grid-template-areas:
+    "copy qr"
+    "fallback qr"
+    "actions actions";
+  grid-template-columns: minmax(0, 1fr) 178px;
+  gap: 10px 16px;
   align-items: center;
   border: 1px solid rgba(216, 185, 107, 0.24);
   border-radius: 8px;
-  padding: 10px;
+  padding: 14px;
   background: rgba(216, 185, 107, 0.08);
+}
+
+.payment-box > div:first-child {
+  grid-area: copy;
 }
 
 .payment-box strong {
@@ -117,24 +125,28 @@
 }
 
 .payment-box img {
-  width: 156px;
-  height: 156px;
+  grid-area: qr;
+  justify-self: center;
+  width: 168px;
+  height: 168px;
   border-radius: 8px;
   background: #ffffff;
   object-fit: contain;
-  padding: 10px;
+  padding: 12px;
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.22);
 }
 
 .pix-fallback {
+  grid-area: fallback;
   color: #d8b96b;
   font-size: 12px;
   font-weight: 850;
 }
 
 .payment-actions {
-  grid-column: 1 / -1;
+  grid-area: actions;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
 }
 
@@ -1450,11 +1462,18 @@ select.field-invalid,
   }
 
   .payment-box {
+    grid-template-areas:
+      "copy"
+      "qr"
+      "fallback"
+      "actions";
     grid-template-columns: 1fr;
   }
 
   .payment-box img {
     justify-self: center;
+    width: min(190px, 74vw);
+    height: min(190px, 74vw);
   }
 
   .payment-actions {
