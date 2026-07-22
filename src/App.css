@@ -325,15 +325,16 @@
   background:
     linear-gradient(90deg, #081016 0%, #101820 48%, #081016 100%);
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
-  height: clamp(82px, 9vw, 118px);
+  height: clamp(108px, 12vw, 150px);
   min-height: 0;
   padding: 3px;
 }
 
 .brand-hero img {
   display: block;
-  width: 100%;
+  width: min(100%, 1180px);
   height: 100%;
+  margin-inline: auto;
   object-fit: contain;
   object-position: center;
 }
@@ -1530,7 +1531,7 @@ select.field-invalid,
   }
 
   .brand-hero {
-    height: clamp(72px, 20vw, 96px);
+    height: clamp(92px, 24vw, 118px);
     padding: 3px;
   }
 
@@ -1788,7 +1789,7 @@ select.field-invalid,
   }
 
   .brand-hero {
-    height: 70px;
+    height: 86px;
   }
 
   .topbar {
