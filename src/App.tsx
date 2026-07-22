@@ -448,8 +448,6 @@ function App() {
   const [pendingAccess, setPendingAccess] = useState<PendingAccessRow[]>([])
   const [calculatorOpen, setCalculatorOpen] = useState(false)
   const [calculatorValue, setCalculatorValue] = useState('')
-  const [reportTitle, setReportTitle] = useState('Relatorio de contratos')
-  const [reportNotes, setReportNotes] = useState('Relatorio gerado conforme os filtros atuais da guia Contratos.')
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
   const isAppAdmin = session?.user.email?.toLowerCase() === contactEmail
@@ -693,6 +691,14 @@ function App() {
     [filteredContracts],
   )
   const currentMonthLabel = useMemo(getCurrentMonthLabel, [])
+  const monthlyActiveReportContracts = useMemo(() => {
+    const currentMonthKey = getCurrentMonthKey()
+    return contracts.filter((contract) => contract.status === 'active' && contract.date.slice(0, 7) === currentMonthKey)
+  }, [contracts])
+  const monthlyActiveReportTotal = useMemo(
+    () => monthlyActiveReportContracts.reduce((total, contract) => total + getReceivableAmount(contract), 0),
+    [monthlyActiveReportContracts],
+  )
 
   useEffect(() => {
     setCurrentPage(1)
@@ -1197,7 +1203,7 @@ function App() {
   }
 
   function printReport() {
-    setSystemMessage('Relatorio pronto para impressao.')
+    setSystemMessage('Relatorio mensal de contratos ativos pronto para impressao.')
     window.setTimeout(() => window.print(), 100)
   }
 
@@ -1381,10 +1387,14 @@ function App() {
             <Plus size={18} aria-hidden="true" />
             Novo acordo
           </a>
-          <a href="#relatorio">
+          <button
+            className="nav-button"
+            onClick={printReport}
+            type="button"
+          >
             <Printer size={18} aria-hidden="true" />
             Relatorio
-          </a>
+          </button>
           <button
             className={calculatorOpen ? 'active nav-button' : 'nav-button'}
             onClick={() => setCalculatorOpen((current) => !current)}
@@ -1501,7 +1511,7 @@ function App() {
           </a>
           <a href="#contratos">Contratos</a>
           <a href="#cadastro">Novo acordo</a>
-          <a href="#relatorio">Relatorio</a>
+          <button onClick={printReport} type="button">Relatorio</button>
           {isAppAdmin ? <a href="#liberacao">Liberar acessos</a> : null}
         </nav>
 
@@ -1929,70 +1939,35 @@ function App() {
           </article>
         </section>
 
-        <section className="panel report-panel print-area" id="relatorio">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">Relatorio para impressao</span>
-              <h2>Relatorio editavel</h2>
+        <section className="report-print-only" aria-hidden="true">
+          <article className="report-preview" aria-label="Relatorio mensal de contratos ativos">
+            <header>
+              <strong>Relatorio mensal - contratos ativos</strong>
+              <span>{currentMonthLabel}</span>
+            </header>
+            <p>Somente contratos marcados como Ativo no mes vigente.</p>
+            <div className="report-summary">
+              <span>Mes: {currentMonthLabel}</span>
+              <span>Contratos ativos: {monthlyActiveReportContracts.length}</span>
+              <span>Total: {formatCurrencyAmount(monthlyActiveReportTotal)}</span>
             </div>
-            <button className="primary-button" onClick={printReport} type="button">
-              <Printer size={16} aria-hidden="true" />
-              Imprimir
-            </button>
-          </div>
-
-          <div className="report-layout">
-            <div className="report-controls">
-              <label>
-                Titulo do relatorio
-                <input
-                  onChange={(event) => setReportTitle(event.target.value)}
-                  value={reportTitle}
-                />
-              </label>
-              <label>
-                Observacoes editaveis
-                <textarea
-                  onChange={(event) => setReportNotes(event.target.value)}
-                  rows={4}
-                  value={reportNotes}
-                />
-              </label>
-              <div className="report-hint">
-                <strong>{filteredContracts.length} contratos no filtro atual</strong>
-                <span>{formatCurrencyAmount(filteredContractsTotal)} a receber em 30 dias.</span>
+            <div className="report-table">
+              <div>
+                <strong>Cliente</strong>
+                <strong>Contrato</strong>
+                <strong>Data</strong>
+                <strong>Total</strong>
               </div>
-            </div>
-
-            <article className="report-preview" aria-label="Previa do relatorio">
-              <header>
-                <strong>{reportTitle || 'Relatorio de contratos'}</strong>
-                <span>{new Intl.DateTimeFormat('pt-BR').format(new Date())}</span>
-              </header>
-              <p>{reportNotes}</p>
-              <div className="report-summary">
-                <span>Quantidade: {filteredContracts.length}</span>
-                <span>Valor original: {formatCurrencyAmount(filteredContractsPrincipalTotal)}</span>
-                <span>Total a receber: {formatCurrencyAmount(filteredContractsTotal)}</span>
-              </div>
-              <div className="report-table">
-                <div>
-                  <strong>Cliente</strong>
-                  <strong>Valor</strong>
-                  <strong>Status</strong>
-                  <strong>Data</strong>
+              {monthlyActiveReportContracts.map((contract) => (
+                <div key={contract.id}>
+                  <span>{contract.clientName}</span>
+                  <span>{contract.id}</span>
+                  <span>{formatDate(contract.date)}</span>
+                  <span>{formatCurrencyAmount(getReceivableAmount(contract))}</span>
                 </div>
-                {filteredContracts.map((contract) => (
-                  <div key={contract.id}>
-                    <span>{contract.clientName}</span>
-                    <span>{formatCurrencyAmount(getReceivableAmount(contract))}</span>
-                    <span>{contractStatusLabels[contract.status]}</span>
-                    <span>{formatDate(contract.date)}</span>
-                  </div>
-                ))}
-              </div>
-            </article>
-          </div>
+              ))}
+            </div>
+          </article>
         </section>
 
         <footer className="site-footer">

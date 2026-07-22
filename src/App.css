@@ -667,7 +667,24 @@ select.field-invalid,
   white-space: nowrap;
 }
 
+.top-tabs button {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 9px;
+  color: var(--ink-700);
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 .top-tabs a:hover,
+.top-tabs button:hover,
 .top-tabs .active {
   border-color: rgba(216, 185, 107, 0.52);
   background: rgba(216, 185, 107, 0.12);
@@ -1231,61 +1248,14 @@ select.field-invalid,
   padding: 0;
 }
 
-.report-panel {
-  scroll-margin-top: 12px;
+.report-print-only {
+  display: none;
 }
 
-.report-layout {
-  display: grid;
-  grid-template-columns: minmax(240px, 0.45fr) minmax(0, 1fr);
-  gap: 10px;
-}
-
-.report-controls {
-  display: grid;
-  gap: 8px;
-}
-
-.report-controls label {
-  display: grid;
-  gap: 5px;
-  color: var(--ink-700);
-  font-size: 11px;
-  font-weight: 800;
-}
-
-.report-controls input,
-.report-controls textarea {
-  min-height: 31px;
-  box-sizing: border-box;
-  padding: 7px 8px;
-  color: var(--ink-700);
-  font: inherit;
-  font-size: 11px;
-  resize: vertical;
-}
-
-.report-hint,
 .report-preview {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-soft);
-}
-
-.report-hint {
-  display: grid;
-  gap: 3px;
-  padding: 8px;
-}
-
-.report-hint strong {
-  color: #ffffff;
-  font-size: 12px;
-}
-
-.report-hint span {
-  color: var(--ink-500);
-  font-size: 11px;
 }
 
 .report-preview {
@@ -1404,9 +1374,7 @@ select.field-invalid,
   .metric-grid,
   .system-message,
   .content-grid,
-  .site-footer,
-  .report-controls,
-  .report-panel .panel-heading button {
+  .site-footer {
     display: none !important;
   }
 
@@ -1415,20 +1383,15 @@ select.field-invalid,
     padding: 0;
   }
 
-  .report-panel,
+  .report-print-only {
+    display: block;
+  }
+
   .report-preview {
     border: 0;
     box-shadow: none;
     background: #ffffff;
     color: #111111;
-  }
-
-  .report-panel {
-    padding: 0;
-  }
-
-  .report-layout {
-    display: block;
   }
 
   .report-preview header strong,
@@ -1685,7 +1648,8 @@ select.field-invalid,
     padding-inline: 10px;
   }
 
-  .top-tabs a {
+  .top-tabs a,
+  .top-tabs button {
     min-height: 28px;
     padding: 0 8px;
     font-size: 10px;
@@ -1743,7 +1707,6 @@ select.field-invalid,
     grid-template-columns: 1fr;
   }
 
-  .report-layout,
   .report-summary,
   .report-table > div,
   .report-preview header {
