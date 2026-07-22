@@ -1614,8 +1614,8 @@ function App() {
               <div className="contracts-total">
                 <span>
                   {contractTab === 'monthly'
-                    ? `Total a receber no mes vigente (${currentMonthLabel})`
-                    : 'Total a receber nesta aba'}
+                    ? `Total a receber em 30 dias - ${currentMonthLabel}`
+                    : 'Total a receber em 30 dias'}
                 </span>
                 <strong>{formatCurrencyAmount(filteredContractsTotal)}</strong>
               </div>
