@@ -18,6 +18,7 @@ O `wrangler.toml` usa:
 name = "mtsappjus"
 main = "dist/server/index.js"
 workers_dev = true
+keep_vars = true
 ```
 
 Isso troca o Worker antigo `appjus` para `mtsappjus`, que e o servico aberto no painel Cloudflare.
@@ -92,6 +93,8 @@ SUPABASE_ANON_KEY=sua_anon_key_publica
 ```
 
 Depois salve e faca um novo deploy. O app injeta essas variaveis em tempo de execucao e o frontend passa a abrir a tela de login conectada ao Supabase.
+
+O campo `keep_vars = true` preserva as variaveis configuradas no dashboard quando o GitHub fizer novo deploy com Wrangler.
 
 ## Deploy por Workers
 

@@ -319,6 +319,7 @@ Configuracao atual do Worker:
 Worker: mtsappjus
 Build command: npm run build
 Deploy command: npx wrangler deploy
+keep_vars: true
 ```
 
 O workflow `.github/workflows/cloudflare-worker.yml` publica automaticamente a branch `main` no Cloudflare Worker quando os secrets estiverem configurados:
