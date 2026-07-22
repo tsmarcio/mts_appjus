@@ -321,7 +321,7 @@
   border-radius: 8px;
   background: #081016;
   box-shadow: 0 22px 48px rgba(0, 0, 0, 0.24);
-  height: clamp(78px, 10vw, 138px);
+  height: clamp(112px, 15vw, 210px);
   min-height: 0;
   padding: 5px;
 }
@@ -1083,7 +1083,7 @@ select.field-invalid,
   }
 
   .brand-hero {
-    height: 64px;
+    height: 92px;
     padding: 4px;
   }
 
