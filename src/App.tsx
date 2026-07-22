@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
   Banknote,
@@ -9,6 +9,9 @@ import {
   LayoutDashboard,
   LockKeyhole,
   Mail,
+  Copy,
+  AtSign,
+  Phone,
   Plus,
   Search,
   ShieldCheck,
@@ -42,7 +45,7 @@ type Contract = {
 type Tenant = {
   id: string
   name: string
-  subscriptionStatus: 'trialing' | 'active' | 'past_due' | 'canceled'
+  subscriptionStatus: 'pending_payment' | 'trialing' | 'active' | 'past_due' | 'canceled'
 }
 
 type AuthForm = {
@@ -105,6 +108,23 @@ type MembershipRow = {
     | null
 }
 
+type PendingAccessRow = {
+  id: string
+  status: Tenant['subscriptionStatus']
+  billing_email: string | null
+  created_at: string
+  tenants:
+    | {
+        id: string
+        name: string
+      }
+    | {
+        id: string
+        name: string
+      }[]
+    | null
+}
+
 const emptyForm: ContractForm = {
   clientName: '',
   documentNumber: '',
@@ -138,6 +158,24 @@ const contractDurationOptions: { label: string; value: ContractDuration }[] = [
     return { label: `${value}x`, value }
   }),
 ]
+
+const pixAmount = 'R$ 29,99'
+const pixPhone = '21964976686'
+const pixQrPath = `${import.meta.env.BASE_URL}payments/pix-mtsappjus.svg`
+const pixCopyPath = `${import.meta.env.BASE_URL}payments/pix-copia-e-cola.txt`
+const trainingPath = `${import.meta.env.BASE_URL}docs/treinamento-usuario-whatsapp.txt`
+const contactEmail = 'mts.ic@hotmail.com'
+const contactPhone = '21964976686'
+const instagramHandle = '@mtsinforj'
+const whatsappLink = `https://wa.me/55${contactPhone}`
+
+const subscriptionStatusLabels: Record<Tenant['subscriptionStatus'], string> = {
+  pending_payment: 'Aguardando pagamento/liberacao',
+  trialing: 'Aguardando liberacao',
+  active: 'Liberado',
+  past_due: 'Pendente',
+  canceled: 'Cancelado',
+}
 
 function formatDuration(value: ContractDuration) {
   return value === 'indefinite' ? 'Tempo indeterminado' : `${value}x`
@@ -315,9 +353,69 @@ function App() {
   const [query, setQuery] = useState('')
   const [contractTab, setContractTab] = useState<ContractTab>('all')
   const [currentPage, setCurrentPage] = useState(1)
+  const [pendingAccess, setPendingAccess] = useState<PendingAccessRow[]>([])
   const [systemMessage, setSystemMessage] = useState('Base zerada e pronta para cadastro.')
   const todayIso = useMemo(getTodayIso, [])
   const brandLogoPath = `${import.meta.env.BASE_URL}brand/mts-appjus-logo.png`
+  const isAppAdmin = session?.user.email?.toLowerCase() === contactEmail
+
+  const loadPendingAccess = useCallback(async () => {
+    if (!supabase || !isAppAdmin) {
+      setPendingAccess([])
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('id, status, billing_email, created_at, tenants(id, name)')
+      .neq('status', 'active')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      setSystemMessage('Nao foi possivel carregar acessos pendentes.')
+      return
+    }
+
+    setPendingAccess((data ?? []) as PendingAccessRow[])
+  }, [isAppAdmin])
+
+  async function approveAccess(subscriptionId: string) {
+    if (!supabase || !isAppAdmin) {
+      return
+    }
+
+    const { error } = await supabase
+      .from('subscriptions')
+      .update({
+        status: 'active',
+        provider: 'pix',
+        approved_at: new Date().toISOString(),
+        approved_by: session?.user.id ?? null,
+        current_period_end: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', subscriptionId)
+
+    if (error) {
+      setSystemMessage('Nao foi possivel liberar este acesso.')
+      return
+    }
+
+    setSystemMessage('Acesso liberado. O usuario ja pode entrar no sistema.')
+    await loadPendingAccess()
+  }
+
+  async function copyPixPayload() {
+    try {
+      const response = await fetch(pixCopyPath)
+      const payload = await response.text()
+      await navigator.clipboard.writeText(payload.trim())
+      setSystemMessage('Codigo Pix copiado. Envie o comprovante pelo WhatsApp para liberar o acesso.')
+    } catch {
+      await navigator.clipboard.writeText(pixPhone)
+      setSystemMessage('Chave Pix telefone copiada. Envie o comprovante pelo WhatsApp para liberar o acesso.')
+    }
+  }
 
   async function loadTenant(currentSession: Session | null) {
     if (!isSupabaseConfigured || !supabase || !currentSession) {
@@ -429,6 +527,10 @@ function App() {
     void loadSupabaseContracts()
   }, [session, tenant])
 
+  useEffect(() => {
+    void loadPendingAccess()
+  }, [loadPendingAccess])
+
   const filteredContracts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
     const contractsByTab =
@@ -524,14 +626,18 @@ function App() {
 
     await supabase.from('subscriptions').insert({
       tenant_id: tenantData.id,
-      status: 'trialing',
+      status: 'pending_payment',
       billing_email: currentSession.user.email,
+      provider: 'pix',
+      provider_subscription_id: 'PIX_UNICO_29_99',
+      payment_amount: 29.99,
+      payment_method: 'pix',
     })
 
     const nextTenant: Tenant = {
       id: tenantData.id,
       name: tenantData.name,
-      subscriptionStatus: 'trialing',
+      subscriptionStatus: 'pending_payment',
     }
     setTenant(nextTenant)
     return nextTenant
@@ -560,7 +666,7 @@ function App() {
       if (data.session) {
         setSession(data.session)
         await createTenantForUser(data.session, authForm.organizationName)
-        setSystemMessage('Conta criada. Sua base isolada ja esta pronta.')
+        setSystemMessage('Conta criada. Pague o Pix e envie o comprovante para liberar o login.')
       } else {
         setSystemMessage('Conta criada. Confirme o e-mail antes de entrar.')
       }
@@ -581,7 +687,7 @@ function App() {
       if (!loadedTenant && data.session) {
         await createTenantForUser(data.session, authForm.organizationName)
       }
-      setSystemMessage('Login realizado com sucesso.')
+      setSystemMessage('Login validado. Verificando liberacao de acesso.')
     }
 
     setAuthLoading(false)
@@ -924,10 +1030,28 @@ function App() {
         <section className="auth-card">
           <img src={brandLogoPath} alt="MTS AppJus" />
           <div>
-            <span className="eyebrow">Acesso mensal por usuario</span>
+            <span className="eyebrow">Acesso unico por usuario</span>
             <h1>{authMode === 'sign-in' ? 'Entrar no sistema' : 'Criar minha base'}</h1>
-            <p>Cada login acessa somente a propria empresa, clientes e contratos.</p>
+            <p>Cada login acessa somente a propria base. O acesso e liberado manualmente apos Pix.</p>
           </div>
+          <section className="payment-box" aria-label="Compra do sistema via Pix">
+            <div>
+              <span className="eyebrow">Compra do sistema</span>
+              <strong>{pixAmount} uma vez so</strong>
+              <p>Pix telefone: {pixPhone}. Envie o comprovante pelo WhatsApp para liberacao.</p>
+            </div>
+            <img src={pixQrPath} alt="QR Code Pix MTS AppJus" />
+            <div className="payment-actions">
+              <button className="ghost-button" onClick={() => void copyPixPayload()} type="button">
+                <Copy size={16} aria-hidden="true" />
+                Copiar Pix
+              </button>
+              <a className="ghost-button" href={whatsappLink} rel="noreferrer" target="_blank">
+                <Phone size={16} aria-hidden="true" />
+                Enviar comprovante
+              </a>
+            </div>
+          </section>
           <form className="auth-form" onSubmit={handleAuthSubmit}>
             {authMode === 'sign-up' ? (
               <label>
@@ -971,7 +1095,52 @@ function App() {
             onClick={() => setAuthMode((mode) => (mode === 'sign-in' ? 'sign-up' : 'sign-in'))}
             type="button"
           >
-            {authMode === 'sign-in' ? 'Criar novo acesso mensal' : 'Ja tenho acesso'}
+            {authMode === 'sign-in' ? 'Comprar e criar acesso' : 'Ja tenho acesso'}
+          </button>
+          <a className="auth-training" href={trainingPath} download>
+            Baixar treinamento para WhatsApp
+          </a>
+          <span className="auth-message">{systemMessage}</span>
+        </section>
+      </main>
+    )
+  }
+
+  if (isSupabaseConfigured && session && tenant && tenant.subscriptionStatus !== 'active') {
+    return (
+      <main className="auth-shell">
+        <section className="auth-card">
+          <img src={brandLogoPath} alt="MTS AppJus" />
+          <div>
+            <span className="eyebrow">Acesso aguardando liberacao</span>
+            <h1>Pagamento Pix pendente</h1>
+            <p>
+              Seu usuario foi criado, mas o sistema so libera a base apos confirmacao manual do pagamento.
+            </p>
+          </div>
+          <section className="payment-box" aria-label="Pagamento pendente via Pix">
+            <div>
+              <strong>{pixAmount} uma vez so</strong>
+              <p>Status atual: {subscriptionStatusLabels[tenant.subscriptionStatus]}.</p>
+              <p>Envie o comprovante pelo WhatsApp e aguarde a liberacao do login.</p>
+            </div>
+            <img src={pixQrPath} alt="QR Code Pix MTS AppJus" />
+            <div className="payment-actions">
+              <button className="ghost-button" onClick={() => void copyPixPayload()} type="button">
+                <Copy size={16} aria-hidden="true" />
+                Copiar Pix
+              </button>
+              <a className="ghost-button" href={whatsappLink} rel="noreferrer" target="_blank">
+                <Phone size={16} aria-hidden="true" />
+                WhatsApp
+              </a>
+              <button className="ghost-button" onClick={() => void loadTenant(session)} type="button">
+                Conferir liberacao
+              </button>
+            </div>
+          </section>
+          <button className="auth-switch" onClick={() => void handleSignOut()} type="button">
+            Sair
           </button>
           <span className="auth-message">{systemMessage}</span>
         </section>
@@ -1005,6 +1174,12 @@ function App() {
             <Plus size={18} aria-hidden="true" />
             Novo acordo
           </a>
+          {isAppAdmin ? (
+            <a href="#liberacao">
+              <ShieldCheck size={18} aria-hidden="true" />
+              Liberar acessos
+            </a>
+          ) : null}
         </nav>
 
         <section className="security-panel" aria-label="Resumo de seguranca">
@@ -1049,7 +1224,7 @@ function App() {
             <strong>{tenant?.name ?? (isSupabaseConfigured ? 'Supabase conectado' : 'Banco Supabase pendente')}</strong>
             <span>
               {tenant
-                ? `Plano mensal: ${tenant.subscriptionStatus}`
+                ? `Acesso: ${subscriptionStatusLabels[tenant.subscriptionStatus]}`
                 : isSupabaseConfigured
                   ? 'Login online habilitado. Entre para usar sua base na nuvem.'
                   : `Configure no Cloudflare: ${supabaseConfig.missing.join(' + ')}`}
@@ -1091,6 +1266,44 @@ function App() {
         </section>
 
         <section className="content-grid clean">
+          {isAppAdmin ? (
+            <article className="panel admin-panel" id="liberacao">
+              <div className="panel-heading">
+                <div>
+                  <span className="eyebrow">Painel do proprietario</span>
+                  <h2>Liberação de acessos Pix</h2>
+                </div>
+                <button className="ghost-button" onClick={() => void loadPendingAccess()} type="button">
+                  Atualizar
+                </button>
+              </div>
+              <div className="admin-list">
+                {pendingAccess.length > 0 ? (
+                  pendingAccess.map((access) => {
+                    const accessTenant = Array.isArray(access.tenants) ? access.tenants[0] : access.tenants
+                    return (
+                      <div className="admin-row" key={access.id}>
+                        <div>
+                          <strong>{accessTenant?.name ?? 'Base sem nome'}</strong>
+                          <span>{access.billing_email ?? 'sem e-mail'}</span>
+                          <small>{subscriptionStatusLabels[access.status]}</small>
+                        </div>
+                        <button className="primary-button" onClick={() => void approveAccess(access.id)} type="button">
+                          Liberar login
+                        </button>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="empty-state">
+                    <strong>Nenhum acesso pendente</strong>
+                    <span>Quando um usuario comprar por Pix, ele aparece aqui para liberacao.</span>
+                  </div>
+                )}
+              </div>
+            </article>
+          ) : null}
+
           <article className="panel contracts-panel" id="contratos">
             <div className="panel-heading">
               <div>
@@ -1352,6 +1565,14 @@ function App() {
 
         <footer className="site-footer">
           <span>Feito por: mtsinforj</span>
+          <a href="https://www.instagram.com/mtsinforj" rel="noreferrer" target="_blank">
+            <AtSign size={15} aria-hidden="true" />
+            {instagramHandle}
+          </a>
+          <a href={whatsappLink} rel="noreferrer" target="_blank">
+            <Phone size={15} aria-hidden="true" />
+            {contactPhone}
+          </a>
           <a href="mailto:mts.ic@hotmail.com">mts.ic@hotmail.com</a>
         </footer>
       </section>

@@ -10,15 +10,15 @@ src/index.css
 
 ## Cores
 
-As cores principais estao no topo de `src/App.css`, dentro de `.app-shell`:
+As cores principais estao no topo de `src/App.css`, dentro de `:root`:
 
 ```css
---brand-900: #123a24;
---brand-700: #1f6a3e;
---brand-500: #31a85b;
---brand-100: #e1f7e8;
---ink-950: #0d1117;
---page: #f8f9fa;
+--gold: #d3ad4f;
+--gold-soft: #f8edcf;
+--ink: #f7f2e7;
+--muted: #a9c1d4;
+--line: rgba(211, 173, 79, 0.28);
+--panel: rgba(20, 36, 45, 0.78);
 ```
 
 Para mudar a identidade visual, comece por esses tokens. O restante da tela reaproveita essas variaveis.
@@ -28,17 +28,18 @@ Para mudar a identidade visual, comece por esses tokens. O restante da tela reap
 - Menu lateral: bloco `<aside className="sidebar">` em `src/App.tsx`.
 - Topo e busca: `<header className="topbar">`.
 - Indicadores: array `metrics`.
-- Tabela de operacoes: array `operations`.
-- Compliance: array `workflow`.
-- Auditoria: array `auditTrail`.
-- Esboco Figma: array `figmaBoards`.
+- Abas de contrato: `contractTab` e lista `contractStatusLabels`.
+- Lista de contratos: painel `contracts-panel`.
+- Cadastro de novo acordo: formulario no painel `entry-panel`.
+- Login, Pix e liberacao de acesso: blocos `auth-shell`, `payment-box` e `admin-panel`.
+- Rodape: bloco `site-footer`.
 
 ## Caminhos de melhoria visual
 
-1. Para um visual mais juridico premium: manter verde escuro, mais branco, menos sombras.
-2. Para um visual SaaS operacional: aumentar densidade, reduzir cards e mostrar mais linhas por tela.
-3. Para um visual mobile-first: transformar a sidebar em barra inferior e priorizar cards empilhados.
-4. Para seguir o Figma: use os SVGs em `docs/figma-starter-kit` como referencia de frames.
+1. Para um visual mais juridico premium: manter fundo escuro, dourado pontual, poucas bordas e textos bem alinhados.
+2. Para um visual SaaS operacional: aumentar densidade, reduzir altura de cards e mostrar mais linhas por tela.
+3. Para mobile-first: testar primeiro com largura de 390px e evitar textos longos em botoes.
+4. Para refinar o banner: ajustar `.brand-hero` e `.brand-hero img`, mantendo `object-fit: contain`.
 
 ## Regra pratica
 

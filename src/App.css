@@ -28,7 +28,7 @@
 }
 
 .auth-card {
-  width: min(480px, 100%);
+  width: min(620px, 100%);
   display: grid;
   gap: 20px;
   border: 1px solid rgba(216, 185, 107, 0.24);
@@ -87,6 +87,53 @@
   background: rgba(216, 185, 107, 0.08);
   color: #f4ecd7;
   font-size: 13px;
+}
+
+.payment-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 148px;
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(216, 185, 107, 0.24);
+  border-radius: 8px;
+  padding: 14px;
+  background: rgba(216, 185, 107, 0.08);
+}
+
+.payment-box strong {
+  display: block;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.payment-box p {
+  margin-top: 7px;
+  color: #b9c4cc;
+  font-size: 13px;
+}
+
+.payment-box img {
+  width: 148px;
+  height: 148px;
+  border-radius: 8px;
+  background: #ffffff;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.payment-actions {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.auth-training {
+  color: #d8b96b;
+  font-weight: 850;
+  text-align: center;
+  text-decoration: none;
 }
 
 .app-shell {
@@ -489,6 +536,47 @@ select.field-invalid,
   overflow: hidden;
 }
 
+.admin-panel {
+  grid-column: 1 / -1;
+}
+
+.admin-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--surface-soft);
+}
+
+.admin-row strong,
+.admin-row span,
+.admin-row small {
+  display: block;
+}
+
+.admin-row strong {
+  color: #ffffff;
+}
+
+.admin-row span {
+  color: var(--ink-500);
+  font-size: 13px;
+}
+
+.admin-row small {
+  margin-top: 4px;
+  color: var(--brand-500);
+  font-weight: 850;
+}
+
 .top-tabs {
   display: flex;
   align-items: center;
@@ -706,6 +794,9 @@ select.field-invalid,
 }
 
 .site-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--brand-500);
   text-decoration: none;
   font-weight: 800;
@@ -823,6 +914,18 @@ select.field-invalid,
   .auth-card img {
     max-height: 120px;
     object-fit: contain;
+  }
+
+  .payment-box {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-box img {
+    justify-self: center;
+  }
+
+  .payment-actions {
+    grid-template-columns: 1fr;
   }
 
   .sidebar {
@@ -980,6 +1083,10 @@ select.field-invalid,
 
   .contract-row {
     gap: 8px;
+  }
+
+  .admin-row {
+    grid-template-columns: 1fr;
   }
 
   .pagination-bar,

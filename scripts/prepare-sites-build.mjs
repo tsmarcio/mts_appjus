@@ -14,6 +14,9 @@ const js = jsFile ? await readFile(`dist/assets/${jsFile}`, 'utf8') : ''
 const logo = await readFile('dist/brand/mts-appjus-logo.png')
 const favicon = await readFile('dist/favicon.svg', 'utf8')
 const icons = await readFile('dist/icons.svg', 'utf8')
+const pixQr = await readFile('dist/payments/pix-mtsappjus.svg', 'utf8')
+const pixCopy = await readFile('dist/payments/pix-copia-e-cola.txt', 'utf8')
+const training = await readFile('dist/docs/treinamento-usuario-whatsapp.txt', 'utf8')
 const scriptTagPattern = new RegExp('<script type="module"[^>]+src="/assets/[^"]+"></script>')
 const styleTagPattern = new RegExp('<link rel="stylesheet"[^>]+href="/assets/[^"]+">')
 
@@ -27,6 +30,18 @@ const textAssets = {
   '/icons.svg': {
     content: icons,
     contentType: 'image/svg+xml; charset=utf-8',
+  },
+  '/payments/pix-mtsappjus.svg': {
+    content: pixQr,
+    contentType: 'image/svg+xml; charset=utf-8',
+  },
+  '/payments/pix-copia-e-cola.txt': {
+    content: pixCopy,
+    contentType: 'text/plain; charset=utf-8',
+  },
+  '/docs/treinamento-usuario-whatsapp.txt': {
+    content: training,
+    contentType: 'text/plain; charset=utf-8',
   },
 }
 

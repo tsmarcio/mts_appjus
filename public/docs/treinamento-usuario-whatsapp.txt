@@ -1,0 +1,35 @@
+MTS AppJus - Treinamento rapido do usuario
+
+Link oficial:
+https://mtsappjus.mtsappjus.workers.dev
+
+1. Compra e liberacao
+- Acesse o link oficial.
+- Pague o Pix unico de R$ 29,99.
+- Chave Pix telefone: 21964976686
+- Envie o comprovante pelo WhatsApp: 21964976686
+- Aguarde a liberacao manual do login.
+
+2. Criar acesso
+- Clique em Comprar e criar acesso.
+- Informe nome da base/empresa.
+- Informe e-mail e senha.
+- Depois do cadastro, o sistema pode mostrar Pagamento Pix pendente.
+- Apos a liberacao, entre novamente com e-mail e senha.
+
+3. Cadastrar contrato
+- Clique em Novo acordo.
+- Informe a referencia da pessoa que pediu o credito.
+- Preencha nome do cliente, CPF/CNPJ, telefone e e-mail.
+- Preencha valor, data, tempo do contrato e status.
+- Clique em Salvar contrato.
+
+4. Consultar contratos
+- Use as abas Todos, Ativos, Pausados e Inadimplentes.
+- Use a busca para localizar por nome, documento, e-mail, telefone ou referencia.
+
+Suporte:
+Feito por: mtsinforj
+Instagram: @mtsinforj
+Telefone/WhatsApp: 21964976686
+E-mail: mts.ic@hotmail.com
