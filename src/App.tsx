@@ -423,6 +423,8 @@ function App() {
       return null
     }
 
+    const currentUserIsAdmin = currentSession.user.email?.toLowerCase() === contactEmail
+
     const { data, error } = await supabase
       .from('tenant_members')
       .select('tenant_id, tenants(id, name, subscriptions(status))')
@@ -439,7 +441,12 @@ function App() {
     const membership = data as MembershipRow | null
     const tenantData = Array.isArray(membership?.tenants) ? membership?.tenants[0] : membership?.tenants
     if (!tenantData) {
-      setSystemMessage('Usuario autenticado sem empresa vinculada. Crie uma conta nova ou solicite convite.')
+      setTenant(null)
+      setSystemMessage(
+        currentUserIsAdmin
+          ? 'Acesso master liberado. Use o painel para autorizar clientes.'
+          : 'Usuario autenticado sem empresa vinculada. Crie uma conta nova ou solicite convite.',
+      )
       return null
     }
 
@@ -684,10 +691,15 @@ function App() {
 
       setSession(data.session)
       const loadedTenant = await loadTenant(data.session)
-      if (!loadedTenant && data.session) {
+      const signingInAsAdmin = data.session?.user.email?.toLowerCase() === contactEmail
+      if (!loadedTenant && data.session && !signingInAsAdmin) {
         await createTenantForUser(data.session, authForm.organizationName)
       }
-      setSystemMessage('Login validado. Verificando liberacao de acesso.')
+      setSystemMessage(
+        signingInAsAdmin
+          ? 'Acesso master liberado. Use o painel para autorizar clientes.'
+          : 'Login validado. Verificando liberacao de acesso.',
+      )
     }
 
     setAuthLoading(false)
@@ -1106,7 +1118,7 @@ function App() {
     )
   }
 
-  if (isSupabaseConfigured && session && tenant && tenant.subscriptionStatus !== 'active') {
+  if (isSupabaseConfigured && session && tenant && tenant.subscriptionStatus !== 'active' && !isAppAdmin) {
     return (
       <main className="auth-shell">
         <section className="auth-card">
@@ -1216,14 +1228,26 @@ function App() {
               <Plus size={18} aria-hidden="true" />
               Novo acordo
             </a>
+            {isAppAdmin ? (
+              <a className="ghost-button" href="#liberacao">
+                <ShieldCheck size={18} aria-hidden="true" />
+                Liberar acessos
+              </a>
+            ) : null}
           </div>
         </header>
 
         <section className="tenant-bar" aria-label="Conta ativa">
           <div>
-            <strong>{tenant?.name ?? (isSupabaseConfigured ? 'Supabase conectado' : 'Banco Supabase pendente')}</strong>
+            <strong>
+              {isAppAdmin
+                ? 'Acesso master'
+                : tenant?.name ?? (isSupabaseConfigured ? 'Supabase conectado' : 'Banco Supabase pendente')}
+            </strong>
             <span>
-              {tenant
+              {isAppAdmin
+                ? 'Administrador liberado para aprovar clientes apos confirmacao do Pix.'
+                : tenant
                 ? `Acesso: ${subscriptionStatusLabels[tenant.subscriptionStatus]}`
                 : isSupabaseConfigured
                   ? 'Login online habilitado. Entre para usar sua base na nuvem.'
@@ -1243,6 +1267,7 @@ function App() {
           </a>
           <a href="#contratos">Contratos</a>
           <a href="#cadastro">Novo acordo</a>
+          {isAppAdmin ? <a href="#liberacao">Liberar acessos</a> : null}
         </nav>
 
         <section className="metric-grid compact" aria-label="Indicadores principais">
