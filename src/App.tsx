@@ -280,6 +280,50 @@ function getCurrentMonthKey() {
   return today.toISOString().slice(0, 7)
 }
 
+function getMonthIndex(monthKey: string) {
+  const [year, month] = monthKey.split('-').map(Number)
+  return year * 12 + month - 1
+}
+
+function getContractMonthIndex(contract: Contract) {
+  return getMonthIndex(contract.date.slice(0, 7))
+}
+
+function getPeriodCycleCount(contract: Contract, mode: DateFilterMode, value: string, tab: ContractTab) {
+  if (!contract.date) {
+    return 0
+  }
+
+  const contractMonth = getContractMonthIndex(contract)
+
+  if (mode === 'month' && value) {
+    return contractMonth <= getMonthIndex(value) ? 1 : 0
+  }
+
+  if (mode === 'year' && value.length === 4) {
+    const year = Number(value)
+    const currentYear = Number(getCurrentMonthKey().slice(0, 4))
+    const periodStart = year * 12
+    const periodEnd = year === currentYear ? getMonthIndex(getCurrentMonthKey()) : periodStart + 11
+
+    if (contractMonth > periodEnd) {
+      return 0
+    }
+
+    return periodEnd - Math.max(contractMonth, periodStart) + 1
+  }
+
+  if (mode === 'day' && value) {
+    return contract.date === value ? 1 : 0
+  }
+
+  if (tab === 'monthly') {
+    return contractMonth <= getMonthIndex(getCurrentMonthKey()) ? 1 : 0
+  }
+
+  return 1
+}
+
 function getCurrentMonthLabel() {
   return new Intl.DateTimeFormat('pt-BR', {
     month: 'long',
@@ -634,12 +678,11 @@ function App() {
 
   const filteredContracts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase()
-    const currentMonthKey = getCurrentMonthKey()
     const contractsByTab =
       contractTab === 'all'
         ? contracts
         : contractTab === 'monthly'
-          ? contracts.filter((contract) => contract.date.slice(0, 7) === currentMonthKey)
+          ? contracts.filter((contract) => getPeriodCycleCount(contract, 'all', '', 'monthly') > 0)
           : contracts.filter((contract) => contract.status === contractTab)
 
     const contractsByDate = contractsByTab.filter((contract) => {
@@ -647,15 +690,7 @@ function App() {
         return true
       }
 
-      if (dateFilterMode === 'day') {
-        return contract.date === dateFilterValue
-      }
-
-      if (dateFilterMode === 'month') {
-        return contract.date.slice(0, 7) === dateFilterValue
-      }
-
-      return contract.date.slice(0, 4) === dateFilterValue
+      return getPeriodCycleCount(contract, dateFilterMode, dateFilterValue, contractTab) > 0
     })
 
     if (!normalizedQuery) {
@@ -684,17 +719,36 @@ function App() {
   const totalPages = Math.max(1, Math.ceil(filteredContracts.length / contractsPerPage))
   const pagedContracts = filteredContracts.slice((currentPage - 1) * contractsPerPage, currentPage * contractsPerPage)
   const filteredContractsTotal = useMemo(
-    () => filteredContracts.reduce((total, contract) => total + getReceivableAmount(contract), 0),
-    [filteredContracts],
+    () =>
+      filteredContracts.reduce(
+        (total, contract) =>
+          total + getReceivableAmount(contract) * getPeriodCycleCount(contract, dateFilterMode, dateFilterValue, contractTab),
+        0,
+      ),
+    [contractTab, dateFilterMode, dateFilterValue, filteredContracts],
   )
   const filteredContractsPrincipalTotal = useMemo(
-    () => filteredContracts.reduce((total, contract) => total + parseCurrencyValue(contract.value), 0),
-    [filteredContracts],
+    () =>
+      filteredContracts.reduce(
+        (total, contract) =>
+          total + parseCurrencyValue(contract.value) * getPeriodCycleCount(contract, dateFilterMode, dateFilterValue, contractTab),
+        0,
+      ),
+    [contractTab, dateFilterMode, dateFilterValue, filteredContracts],
+  )
+  const filteredContractsCycleCount = useMemo(
+    () =>
+      filteredContracts.reduce(
+        (total, contract) => total + getPeriodCycleCount(contract, dateFilterMode, dateFilterValue, contractTab),
+        0,
+      ),
+    [contractTab, dateFilterMode, dateFilterValue, filteredContracts],
   )
   const currentMonthLabel = useMemo(getCurrentMonthLabel, [])
   const monthlyActiveReportContracts = useMemo(() => {
-    const currentMonthKey = getCurrentMonthKey()
-    return contracts.filter((contract) => contract.status === 'active' && contract.date.slice(0, 7) === currentMonthKey)
+    return contracts.filter(
+      (contract) => contract.status === 'active' && getPeriodCycleCount(contract, 'all', '', 'monthly') > 0,
+    )
   }, [contracts])
   const monthlyActiveReportTotal = useMemo(
     () => monthlyActiveReportContracts.reduce((total, contract) => total + getReceivableAmount(contract), 0),
@@ -1602,7 +1656,7 @@ function App() {
                     tab.value === 'all'
                       ? contracts.length
                       : tab.value === 'monthly'
-                        ? contracts.filter((contract) => contract.date.slice(0, 7) === getCurrentMonthKey()).length
+                        ? contracts.filter((contract) => getPeriodCycleCount(contract, 'all', '', 'monthly') > 0).length
                         : contracts.filter((contract) => contract.status === tab.value).length
                   return (
                     <button
@@ -1662,7 +1716,8 @@ function App() {
                 ) : null}
                 <div className="date-filter-summary" aria-label="Resumo financeiro do filtro">
                   <span>{filteredContracts.length} contratos</span>
-                  <strong>{formatCurrencyAmount(filteredContractsPrincipalTotal)}</strong>
+                  <span>{filteredContractsCycleCount} ciclos 30d</span>
+                  <strong>{formatCurrencyAmount(filteredContractsPrincipalTotal)} base</strong>
                   <strong>{formatCurrencyAmount(filteredContractsTotal)} a receber</strong>
                 </div>
               </div>
@@ -1752,7 +1807,11 @@ function App() {
                 <span>
                   {contractTab === 'monthly'
                     ? `Total a receber em 30 dias - ${currentMonthLabel}`
-                    : 'Total a receber em 30 dias'}
+                    : dateFilterMode === 'year' && dateFilterValue
+                      ? `Total a receber no ano ${dateFilterValue} por ciclos de 30 dias`
+                      : dateFilterMode === 'month' && dateFilterValue
+                        ? `Total a receber no mes ${dateFilterValue} por ciclo de 30 dias`
+                        : 'Total a receber em 30 dias'}
                 </span>
                 <strong>{formatCurrencyAmount(filteredContractsTotal)}</strong>
               </div>
