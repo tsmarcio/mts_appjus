@@ -1077,6 +1077,12 @@ select.field-invalid,
 }
 
 @media (max-width: 760px) {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   html,
   body,
   #root {
@@ -1119,6 +1125,7 @@ select.field-invalid,
   .sidebar {
     padding: 14px;
     gap: 12px;
+    overflow: hidden;
   }
 
   .brand {
@@ -1145,18 +1152,40 @@ select.field-invalid,
   }
 
   .nav-list {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    overflow-x: visible;
     padding-bottom: 2px;
   }
 
   .nav-list a,
   .nav-list button {
-    flex: 0 0 auto;
-    width: auto;
-    min-height: 38px;
-    padding: 9px 10px;
+    width: 100%;
+    min-height: 36px;
+    justify-content: center;
+    padding: 8px;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .quick-calculator {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .quick-calculator input {
+    min-height: 36px;
+    font-size: 16px;
+  }
+
+  .quick-calculator div {
+    gap: 5px;
+  }
+
+  .quick-calculator button {
+    min-height: 32px;
+    padding: 0;
     font-size: 13px;
   }
 
@@ -1289,6 +1318,12 @@ select.field-invalid,
     padding-inline: 16px;
   }
 
+  .top-tabs a {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
+
   .contract-row {
     gap: 10px;
     padding: 14px;
@@ -1328,6 +1363,7 @@ select.field-invalid,
   .row-actions .icon-button {
     flex: 1;
     width: auto;
+    min-height: 34px;
   }
 
   .contracts-total {
@@ -1349,4 +1385,143 @@ select.field-invalid,
     width: 100%;
   }
 
+}
+
+@media (max-width: 430px) {
+  .auth-card,
+  .panel,
+  .metric-card,
+  .tenant-bar,
+  .contracts-total,
+  .contract-row {
+    border-radius: 7px;
+  }
+
+  .sidebar {
+    padding: 10px;
+  }
+
+  .brand {
+    gap: 9px;
+  }
+
+  .brand-logo-frame {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+
+  .brand-logo {
+    width: 132px;
+    height: 48px;
+  }
+
+  .brand strong {
+    font-size: 15px;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nav-list a,
+  .nav-list button,
+  .primary-button,
+  .ghost-button {
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+
+  .workspace {
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .brand-hero {
+    height: 84px;
+  }
+
+  .topbar {
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: 21px;
+  }
+
+  h2 {
+    font-size: 17px;
+  }
+
+  .title-support,
+  .tenant-bar span {
+    font-size: 12px;
+  }
+
+  .search-box {
+    min-height: 38px;
+    padding: 0 10px;
+  }
+
+  .search-box input {
+    font-size: 13px;
+  }
+
+  .contract-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contract-tabs button {
+    width: 100%;
+    min-height: 30px;
+    padding: 0 7px;
+    font-size: 10px;
+  }
+
+  .contract-row {
+    padding: 11px;
+  }
+
+  .contract-row strong,
+  .contracts-total strong {
+    font-size: 15px;
+  }
+
+  .contract-row span,
+  .contract-row small,
+  .contract-row time {
+    font-size: 12px;
+  }
+
+  .contract-row > *[data-label]::before {
+    font-size: 10px;
+  }
+
+  .intake-form fieldset {
+    padding: 11px;
+  }
+
+  .intake-form input,
+  .intake-form select {
+    min-height: 38px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
+  .footer-socials {
+    flex-wrap: wrap;
+  }
+
+  .footer-socials a {
+    height: 32px;
+    min-width: 32px;
+    padding: 0 8px;
+  }
+
+  .footer-payment i {
+    min-width: 38px;
+    font-size: 9px;
+  }
 }
